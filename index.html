@@ -1,0 +1,131 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>坦克大战 - Tank Battle</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            background: #1a1a1a;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            min-height: 100vh;
+            font-family: 'Arial', sans-serif;
+            color: white;
+        }
+
+        #gameContainer {
+            position: relative;
+        }
+
+        #gameCanvas {
+            border: 4px solid #333;
+            background: #000;
+        }
+
+        #ui {
+            margin-top: 10px;
+            display: flex;
+            gap: 30px;
+            font-size: 18px;
+        }
+
+        #startScreen, #gameOverScreen {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.9);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            z-index: 10;
+        }
+
+        #startScreen h1, #gameOverScreen h1 {
+            font-size: 48px;
+            margin-bottom: 20px;
+            color: #ff6b35;
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.5);
+        }
+
+        #startScreen p, #gameOverScreen p {
+            font-size: 16px;
+            margin-bottom: 10px;
+            color: #ccc;
+        }
+
+        button {
+            margin-top: 20px;
+            padding: 15px 40px;
+            font-size: 20px;
+            background: #ff6b35;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: background 0.3s;
+        }
+
+        button:hover {
+            background: #ff8555;
+        }
+
+        .controls {
+            margin-top: 30px;
+            text-align: center;
+        }
+
+        .controls h3 {
+            color: #ff6b35;
+            margin-bottom: 10px;
+        }
+
+        .hidden {
+            display: none !important;
+        }
+    </style>
+</head>
+<body>
+    <div id="gameContainer">
+        <canvas id="gameCanvas" width="640" height="640"></canvas>
+        
+        <div id="startScreen">
+            <h1>🎮 坦克大战</h1>
+            <p>保护你的基地，消灭所有敌人！</p>
+            <div class="controls">
+                <h3>操作说明</h3>
+                <p>WASD / 方向键 - 移动坦克</p>
+                <p>空格键 - 发射子弹</p>
+            </div>
+            <button id="startBtn">开始游戏</button>
+        </div>
+
+        <div id="gameOverScreen" class="hidden">
+            <h1 id="gameOverTitle">游戏结束</h1>
+            <p id="finalScore">最终分数: 0</p>
+            <p id="finalLevel">关卡: 1</p>
+            <button id="restartBtn">重新开始</button>
+        </div>
+    </div>
+
+    <div id="ui">
+        <div>分数: <span id="score">0</span></div>
+        <div>关卡: <span id="level">1</span></div>
+        <div>生命: <span id="lives">3</span></div>
+        <div>敌人: <span id="enemies">0</span></div>
+    </div>
+
+    <script src="game.js"></script>
+</body>
+</html>
