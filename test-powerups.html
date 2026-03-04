@@ -1,0 +1,324 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>坦克游戏道具系统测试</title>
+    <style>
+        body {
+            font-family: 'Arial', sans-serif;
+            background-color: #1a1a1a;
+            color: #fff;
+            margin: 0;
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        h1 {
+            margin-bottom: 20px;
+            color: #ff6b35;
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.5);
+        }
+
+        .controls {
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+            margin-bottom: 20px;
+        }
+
+        button {
+            padding: 10px 20px;
+            font-size: 16px;
+            background-color: #4CAF50;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: background-color 0.3s;
+        }
+
+        button:hover {
+            background-color: #45a049;
+        }
+
+        #gameCanvas {
+            border: 4px solid #333;
+            background-color: #000;
+            display: block;
+            margin-bottom: 20px;
+        }
+
+        .status {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 20px;
+            width: 100%;
+            max-width: 600px;
+            text-align: center;
+        }
+
+        .status-item {
+            padding: 10px;
+            background-color: rgba(255, 255, 255, 0.1);
+            border-radius: 5px;
+        }
+
+        .status-value {
+            font-size: 24px;
+            font-weight: bold;
+            color: #4CAF50;
+        }
+
+        .powerup-type {
+            font-size: 18px;
+            margin-top: 5px;
+            color: #ff6b35;
+        }
+    </style>
+</head>
+<body>
+    <h1>🎮 坦克游戏道具系统测试</h1>
+
+    <div class="controls">
+        <button id="spawnSpeed">生成速度道具</button>
+        <button id="spawnFirepower">生成火力道具</button>
+        <button id="spawnShield">生成护盾道具</button>
+        <button id="spawnLife">生成生命道具</button>
+        <button id="spawnBomb">生成炸弹道具</button>
+        <button id="spawnFreeze">生成冻结道具</button>
+        <button id="clearPowerups">清除所有道具</button>
+        <button id="toggleAutoSpawn">自动生成</button>
+    </div>
+
+    <canvas id="gameCanvas" width="640" height="640"></canvas>
+
+    <div class="status">
+        <div class="status-item">
+            <div>生命</div>
+            <div class="status-value" id="lives">3</div>
+        </div>
+        <div class="status-item">
+            <div>分数</div>
+            <div class="status-value" id="score">0</div>
+        </div>
+        <div class="status-item">
+            <div>关卡</div>
+            <div class="status-value" id="level">1</div>
+        </div>
+        <div class="status-item">
+            <div>敌人</div>
+            <div class="status-value" id="enemies">0</div>
+        </div>
+        <div class="status-item">
+            <div>道具</div>
+            <div class="status-value" id="powerups">0</div>
+        </div>
+        <div class="status-item">
+            <div>当前状态</div>
+            <div class="powerup-type" id="currentState">无</div>
+        </div>
+    </div>
+
+    <script src="game.js"></script>
+    <script>
+        // 测试数据
+        function setupTestEnvironment() {
+            // 初始化游戏状态
+            gameState = {
+                running: true,
+                score: 0,
+                level: 1,
+                lives: 3,
+                enemiesRemaining: 0
+            };
+
+            // 创建玩家
+            player = {
+                x: 320,
+                y: 576,
+                width: 28,
+                height: 28,
+                speed: 2,
+                direction: DIRECTIONS.UP,
+                color: '#4CAF50',
+                isPlayer: true,
+                lastShot: 0,
+                shootCooldown: 300
+            };
+
+            // 创建敌人
+            enemies = [];
+            for (let i = 0; i < 3; i++) {
+                enemies.push({
+                    x: 100 + i * 200,
+                    y: 100,
+                    width: 28,
+                    height: 28,
+                    speed: 1,
+                    direction: DIRECTIONS.DOWN,
+                    color: '#f44336',
+                    isPlayer: false,
+                    lastShot: 0,
+                    shootCooldown: 1000 + Math.random() * 500,
+                    moveTimer: 0,
+                    moveDuration: 60 + Math.random() * 60
+                });
+            }
+
+            // 初始化地图
+            map = [];
+            for (let y = 0; y < GRID_SIZE; y++) {
+                map[y] = [];
+                for (let x = 0; x < GRID_SIZE; x++) {
+                    map[y][x] = TILE_TYPES.EMPTY;
+                }
+            }
+            map[18][9] = TILE_TYPES.BASE;
+
+            // 更新UI
+            updateUI();
+        }
+
+        // 测试按钮事件
+        document.getElementById('spawnSpeed').addEventListener('click', () => {
+            spawnTestPowerup(POWERUP_TYPES.SPEED);
+        });
+
+        document.getElementById('spawnFirepower').addEventListener('click', () => {
+            spawnTestPowerup(POWERUP_TYPES.FIREPOWER);
+        });
+
+        document.getElementById('spawnShield').addEventListener('click', () => {
+            spawnTestPowerup(POWERUP_TYPES.SHIELD);
+        });
+
+        document.getElementById('spawnLife').addEventListener('click', () => {
+            spawnTestPowerup(POWERUP_TYPES.LIFE);
+        });
+
+        document.getElementById('spawnBomb').addEventListener('click', () => {
+            spawnTestPowerup(POWERUP_TYPES.BOMB);
+        });
+
+        document.getElementById('spawnFreeze').addEventListener('click', () => {
+            spawnTestPowerup(POWERUP_TYPES.FREEZE);
+        });
+
+        document.getElementById('clearPowerups').addEventListener('click', () => {
+            powerups = [];
+            updateUI();
+        });
+
+        // 自动生成道具控制
+        let autoSpawnEnabled = false;
+        document.getElementById('toggleAutoSpawn').addEventListener('click', () => {
+            autoSpawnEnabled = !autoSpawnEnabled;
+            const button = document.getElementById('toggleAutoSpawn');
+            button.textContent = autoSpawnEnabled ? '停止自动生成' : '自动生成';
+            button.style.backgroundColor = autoSpawnEnabled ? '#f44336' : '#4CAF50';
+
+            if (autoSpawnEnabled) {
+                startAutoSpawn();
+            } else {
+                stopAutoSpawn();
+            }
+        });
+
+        let autoSpawnTimer = null;
+        function startAutoSpawn() {
+            function spawnRandom() {
+                if (!autoSpawnEnabled) return;
+
+                const types = Object.values(POWERUP_TYPES);
+                const type = types[Math.floor(Math.random() * types.length)];
+                spawnTestPowerup(type);
+
+                const nextDelay = 5000 + Math.random() * 10000; // 5-15秒
+                autoSpawnTimer = setTimeout(spawnRandom, nextDelay);
+            }
+
+            spawnRandom();
+        }
+
+        function stopAutoSpawn() {
+            if (autoSpawnTimer) {
+                clearTimeout(autoSpawnTimer);
+                autoSpawnTimer = null;
+            }
+        }
+
+        function spawnTestPowerup(type) {
+            const x = Math.random() * (CANVAS_SIZE - 16);
+            const y = Math.random() * (CANVAS_SIZE - 16);
+
+            powerups.push({
+                x: x,
+                y: y,
+                width: 16,
+                height: 16,
+                type: type,
+                life: Infinity,
+                spawnTime: Date.now()
+            });
+
+            updateUI();
+        }
+
+        // 更新UI
+        function updateUI() {
+            document.getElementById('lives').textContent = gameState.lives;
+            document.getElementById('score').textContent = gameState.score;
+            document.getElementById('level').textContent = gameState.level;
+            document.getElementById('enemies').textContent = enemies.length;
+            document.getElementById('powerups').textContent = powerups.length;
+
+            // 显示当前状态
+            const stateText = [];
+            if (playerState.speedBoost > Date.now()) {
+                stateText.push('⚡');
+            }
+            if (playerState.firePowerBoost > Date.now()) {
+                stateText.push('🔥');
+            }
+            if (playerState.shield > Date.now()) {
+                stateText.push('🛡️');
+            }
+            if (playerState.freezeActive > Date.now()) {
+                stateText.push('❄️');
+            }
+
+            document.getElementById('currentState').textContent = stateText.length > 0 ? stateText.join(' ') : '无';
+        }
+
+        // 游戏循环
+        function testLoop() {
+            if (!gameState.running) return;
+
+            update();
+            render();
+
+            requestAnimationFrame(testLoop);
+        }
+
+        // 初始化
+        setupTestEnvironment();
+        testLoop();
+
+        // 监听键盘事件
+        document.addEventListener('keydown', (e) => {
+            if (e.code === 'Space') {
+                e.preventDefault();
+                shoot(player);
+            }
+        });
+
+        // 监听窗口关闭
+        window.addEventListener('beforeunload', () => {
+            gameState.running = false;
+        });
+    </script>
+</body>
+</html>
