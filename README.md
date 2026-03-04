@@ -22,6 +22,7 @@
 - **生命系统** - 玩家有 3 条生命
 - **爆炸效果** - 炫酷的爆炸动画
 - **游戏状态** - 开始界面、游戏界面、结束界面
+- **音频系统** - 完整的音效系统，支持开关控制
 
 ## 🎯 操作说明
 
@@ -32,6 +33,7 @@
 | A / ← | 向左移动 |
 | D / → | 向右移动 |
 | 空格键 | 发射子弹 |
+| 音效按钮 | 开关游戏音效（开启/关闭） |
 
 ## 🚀 快速开始
 
@@ -41,7 +43,17 @@
 3. 点击"开始游戏"按钮
 
 ### 方法二：本地服务器（推荐）
-使用 Python 启动一个简单的 HTTP 服务器：
+使用 npm 启动服务器（需要先安装 serve）：
+
+```bash
+# 安装 serve（只需安装一次）
+npm install -g serve
+
+# 启动服务器
+npm run start
+```
+
+或者使用 Python 启动服务器：
 
 ```bash
 # Python 3
@@ -57,9 +69,11 @@ python -m SimpleHTTPServer 8000
 
 ```
 tank-game/
-├── index.html   # 游戏入口页面
-├── game.js      # 游戏逻辑代码
-└── README.md    # 说明文档
+├── index.html        # 游戏入口页面
+├── game.js          # 游戏逻辑代码
+├── package.json     # 项目配置文件
+├── test-audio.html  # 音频系统测试页面
+└── README.md        # 说明文档
 ```
 
 ## 🎨 技术栈
@@ -67,6 +81,7 @@ tank-game/
 - **HTML5 Canvas** - 游戏渲染
 - **原生 JavaScript** - 游戏逻辑（ES6+）
 - **CSS3** - 界面样式
+- **Web Audio API** - 音频系统，实时生成音效
 
 ## 🕹️ 游戏机制
 
@@ -75,6 +90,26 @@ tank-game/
 - 子弹 vs 坦克
 - 子弹 vs 墙壁
 - 坦克 vs 坦克
+
+### 音频系统
+
+#### 音效类型
+- **射击音效** - 玩家和敌人有不同的频率（800Hz/600Hz）
+- **爆炸音效** - 支持小爆炸（600Hz）和大爆炸（400Hz）
+- **移动音效** - 循环播放的方形波（100Hz/80Hz）
+- **关卡完成音效** - 上升的正弦波音阶（523→659→784→1047Hz）
+- **游戏结束音效** - 下降的锯齿波（300Hz→100Hz）
+
+#### 音频特性
+- **实时生成** - 使用 Web Audio API 实时合成音效，无需外部文件
+- **错误处理** - 所有音频函数都有 try-catch 错误处理
+- **资源管理** - 音频资源在播放结束后正确清理
+- **音量控制** - 所有音效都有合适的音量设置
+- **淡出效果** - 停止时使用淡出效果，避免突然中断
+
+#### 控制方法
+- 点击界面上的"音效"按钮可以开关所有音效
+- 音效开关状态会实时更新按钮显示和颜色
 
 ### AI 行为
 - 敌人随机改变移动方向
@@ -104,6 +139,49 @@ speed: tank.isPlayer ? 5 : 4,  // 子弹速度
 ```javascript
 const TILE_SIZE = 32;  // 瓦片大小
 const GRID_SIZE = 20;  // 网格大小
+```
+
+### 修改音频系统
+
+#### 修改音效音量
+在 `game.js` 中找到音频函数并修改 `gain` 相关设置：
+```javascript
+// 射击音效
+gainNode.gain.setValueAtTime(0.3, audioCtx.currentTime);
+
+// 爆炸音效（大/小）
+gainNode.gain.setValueAtTime(size === 'large' ? 0.5 : 0.3, audioCtx.currentTime);
+
+// 移动音效
+movementGain.gain.setValueAtTime(0.1, audioCtx.currentTime);
+
+// 关卡完成/游戏结束
+gainNode.gain.setValueAtTime(0.3, audioCtx.currentTime);
+```
+
+#### 修改音效频率
+在 `game.js` 中找到音频函数并修改 `frequency` 相关设置：
+```javascript
+// 射击音效（玩家/敌人）
+oscillator.frequency.value = isPlayer ? 800 : 600;
+
+// 爆炸音效（大/小）
+oscillator.frequency.setValueAtTime(size === 'large' ? 400 : 600, audioCtx.currentTime);
+
+// 移动音效（玩家/敌人）
+movementOscillator.frequency.value = isPlayer ? 100 : 80;
+```
+
+#### 修改音效持续时间
+在 `game.js` 中找到音频函数并修改 `stop` 和 `rampToValueAtTime` 时间：
+```javascript
+// 射击音效持续时间
+oscillator.stop(audioCtx.currentTime + 0.1);
+gainNode.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + 0.1);
+
+// 爆炸音效持续时间
+oscillator.stop(audioCtx.currentTime + 0.2);
+gainNode.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + 0.2);
 ```
 
 ## 📜 游戏规则
