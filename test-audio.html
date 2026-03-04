@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>音频测试</title>
+    <style>
+        body { font-family: Arial, sans-serif; text-align: center; margin-top: 50px; }
+        .controls { display: flex; gap: 20px; justify-content: center; margin-top: 20px; }
+        button { padding: 10px 20px; font-size: 18px; cursor: pointer; }
+        .status { margin-top: 20px; font-size: 18px; }
+    </style>
+</head>
+<body>
+    <h1>坦克游戏音频系统测试</h1>
+    <div class="controls">
+        <button id="initBtn">初始化音频</button>
+        <button id="shootBtn">射击音效</button>
+        <button id="explodeBtn">爆炸音效</button>
+        <button id="moveBtn">移动音效</button>
+        <button id="levelBtn">关卡完成</button>
+        <button id="gameOverBtn">游戏结束</button>
+        <button id="toggleBtn">切换音效开关</button>
+    </div>
+    <div class="status">
+        音频状态: <span id="audioStatus">未初始化</span><br>
+        音效开关: <span id="soundStatus">开启</span>
+    </div>
+
+    <script src="game.js"></script>
+    <script>
+        document.getElementById('initBtn').addEventListener('click', () => {
+            initAudio();
+            document.getElementById('audioStatus').textContent = '已初始化';
+        });
+
+        document.getElementById('shootBtn').addEventListener('click', () => {
+            playShootSound(true);
+        });
+
+        document.getElementById('explodeBtn').addEventListener('click', () => {
+            playExplosionSound('large');
+        });
+
+        document.getElementById('moveBtn').addEventListener('click', () => {
+            if (document.getElementById('moveBtn').textContent === '移动音效') {
+                playMovementSound(true);
+                document.getElementById('moveBtn').textContent = '停止移动';
+            } else {
+                stopMovementSound();
+                document.getElementById('moveBtn').textContent = '移动音效';
+            }
+        });
+
+        document.getElementById('levelBtn').addEventListener('click', () => {
+            playLevelCompleteSound();
+        });
+
+        document.getElementById('gameOverBtn').addEventListener('click', () => {
+            playGameOverSound();
+        });
+
+        document.getElementById('toggleBtn').addEventListener('click', () => {
+            soundEnabled = !soundEnabled;
+            document.getElementById('soundStatus').textContent = soundEnabled ? '开启' : '关闭';
+            
+            const soundBtn = document.getElementById('soundBtn');
+            if (soundBtn) {
+                soundBtn.textContent = soundEnabled ? '开启' : '关闭';
+                soundBtn.style.background = soundEnabled ? '#4CAF50' : '#f44336';
+            }
+        });
+    </script>
+</body>
+</html>

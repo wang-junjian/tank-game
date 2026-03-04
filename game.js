@@ -2,10 +2,204 @@
 const canvas = document.getElementById('gameCanvas');
 const ctx = canvas.getContext('2d');
 
+// 音频上下文
+let audioCtx = null;
+
+// 初始化音频系统
+function initAudio() {
+    if (!audioCtx) {
+        audioCtx = new (window.AudioContext)();
+    }
+}
+
+// 播放射击音效
+function playShootSound(isPlayer = true) {
+    if (!audioCtx || !soundEnabled) return;
+
+    try {
+        const oscillator = audioCtx.createOscillator();
+        const gainNode = audioCtx.createGain();
+
+        oscillator.connect(gainNode);
+        gainNode.connect(audioCtx.destination);
+
+        oscillator.frequency.value = isPlayer ? 800 : 600;
+        oscillator.type = 'square';
+
+        gainNode.gain.setValueAtTime(0.3, audioCtx.currentTime);
+        gainNode.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + 0.1);
+
+        oscillator.start(audioCtx.currentTime);
+        oscillator.stop(audioCtx.currentTime + 0.1);
+
+        // 确保资源释放
+        setTimeout(() => {
+            oscillator.disconnect();
+            gainNode.disconnect();
+        }, 150);
+    } catch (error) {
+        console.error('播放射击音效失败:', error);
+    }
+}
+
+// 播放爆炸音效
+function playExplosionSound(size = 'small') {
+    if (!audioCtx || !soundEnabled) return;
+
+    try {
+        const oscillator = audioCtx.createOscillator();
+        const gainNode = audioCtx.createGain();
+
+        oscillator.connect(gainNode);
+        gainNode.connect(audioCtx.destination);
+
+        oscillator.frequency.setValueAtTime(size === 'large' ? 400 : 600, audioCtx.currentTime);
+        oscillator.frequency.exponentialRampToValueAtTime(50, audioCtx.currentTime + 0.2);
+        oscillator.type = 'sawtooth';
+
+        gainNode.gain.setValueAtTime(size === 'large' ? 0.5 : 0.3, audioCtx.currentTime);
+        gainNode.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + 0.2);
+
+        oscillator.start(audioCtx.currentTime);
+        oscillator.stop(audioCtx.currentTime + 0.2);
+
+        // 确保资源释放
+        setTimeout(() => {
+            oscillator.disconnect();
+            gainNode.disconnect();
+        }, 250);
+    } catch (error) {
+        console.error('播放爆炸音效失败:', error);
+    }
+}
+
+// 播放移动音效
+let movementOscillator = null;
+let movementGain = null;
+let movementPlaying = false;
+
+function playMovementSound(isPlayer = true) {
+    if (!audioCtx || !soundEnabled || movementPlaying) return;
+
+    movementPlaying = true;
+
+    try {
+        movementOscillator = audioCtx.createOscillator();
+        movementGain = audioCtx.createGain();
+
+        movementOscillator.connect(movementGain);
+        movementGain.connect(audioCtx.destination);
+
+        movementOscillator.frequency.value = isPlayer ? 100 : 80;
+        movementOscillator.type = 'square';
+
+        movementGain.gain.setValueAtTime(0.1, audioCtx.currentTime);
+
+        movementOscillator.start();
+    } catch (error) {
+        console.error('播放移动音效失败:', error);
+        movementPlaying = false;
+    }
+}
+
+function stopMovementSound() {
+    if (!audioCtx || !movementPlaying) return;
+
+    movementPlaying = false;
+
+    try {
+        movementGain.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + 0.1);
+        movementOscillator.stop(audioCtx.currentTime + 0.1);
+
+        // 确保资源完全释放
+        setTimeout(() => {
+            if (movementOscillator) {
+                movementOscillator.disconnect();
+                movementOscillator = null;
+            }
+            if (movementGain) {
+                movementGain.disconnect();
+                movementGain = null;
+            }
+        }, 150);
+    } catch (error) {
+        console.error('停止移动音效失败:', error);
+        movementOscillator = null;
+        movementGain = null;
+    }
+}
+
+// 播放关卡完成音效
+function playLevelCompleteSound() {
+    if (!audioCtx || !soundEnabled) return;
+
+    try {
+        const oscillator = audioCtx.createOscillator();
+        const gainNode = audioCtx.createGain();
+
+        oscillator.connect(gainNode);
+        gainNode.connect(audioCtx.destination);
+
+        oscillator.frequency.setValueAtTime(523, audioCtx.currentTime);
+        oscillator.frequency.setValueAtTime(659, audioCtx.currentTime + 0.2);
+        oscillator.frequency.setValueAtTime(784, audioCtx.currentTime + 0.4);
+        oscillator.frequency.setValueAtTime(1047, audioCtx.currentTime + 0.6);
+        oscillator.type = 'sine';
+
+        gainNode.gain.setValueAtTime(0.3, audioCtx.currentTime);
+        gainNode.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + 0.8);
+
+        oscillator.start(audioCtx.currentTime);
+        oscillator.stop(audioCtx.currentTime + 0.8);
+
+        // 确保资源释放
+        setTimeout(() => {
+            oscillator.disconnect();
+            gainNode.disconnect();
+        }, 900);
+    } catch (error) {
+        console.error('播放关卡完成音效失败:', error);
+    }
+}
+
+// 播放游戏结束音效
+function playGameOverSound() {
+    if (!audioCtx || !soundEnabled) return;
+
+    try {
+        const oscillator = audioCtx.createOscillator();
+        const gainNode = audioCtx.createGain();
+
+        oscillator.connect(gainNode);
+        gainNode.connect(audioCtx.destination);
+
+        oscillator.frequency.setValueAtTime(300, audioCtx.currentTime);
+        oscillator.frequency.exponentialRampToValueAtTime(100, audioCtx.currentTime + 0.8);
+        oscillator.type = 'sawtooth';
+
+        gainNode.gain.setValueAtTime(0.4, audioCtx.currentTime);
+        gainNode.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + 0.8);
+
+        oscillator.start(audioCtx.currentTime);
+        oscillator.stop(audioCtx.currentTime + 0.8);
+
+        // 确保资源释放
+        setTimeout(() => {
+            oscillator.disconnect();
+            gainNode.disconnect();
+        }, 900);
+    } catch (error) {
+        console.error('播放游戏结束音效失败:', error);
+    }
+}
+
 // 游戏常量
 const TILE_SIZE = 32;
 const GRID_SIZE = 20;
 const CANVAS_SIZE = TILE_SIZE * GRID_SIZE;
+
+// 音效开关
+let soundEnabled = true;
 
 // 方向
 const DIRECTIONS = {
@@ -63,6 +257,13 @@ function setupEventListeners() {
 
     document.getElementById('startBtn').addEventListener('click', startGame);
     document.getElementById('restartBtn').addEventListener('click', startGame);
+
+    document.getElementById('soundBtn').addEventListener('click', () => {
+        soundEnabled = !soundEnabled;
+        const soundBtn = document.getElementById('soundBtn');
+        soundBtn.textContent = soundEnabled ? '开启' : '关闭';
+        soundBtn.style.background = soundEnabled ? '#4CAF50' : '#f44336';
+    });
 }
 
 // 显示开始屏幕
@@ -73,6 +274,7 @@ function showStartScreen() {
 
 // 开始游戏
 function startGame() {
+    initAudio();
     gameState = {
         running: true,
         score: 0,
@@ -93,7 +295,12 @@ function initLevel() {
     enemies = [];
     bullets = [];
     explosions = [];
-    
+
+    // 确保移动音效停止
+    if (movementPlaying) {
+        stopMovementSound();
+    }
+
     generateMap();
     createPlayer();
     spawnEnemies();
@@ -280,6 +487,13 @@ function updatePlayer() {
         }
     }
 
+    // 优化移动音效控制：只在状态变化时调用
+    if (moving && !movementPlaying) {
+        playMovementSound(true);
+    } else if (!moving && movementPlaying) {
+        stopMovementSound();
+    }
+
     if (keys['Space']) {
         shoot(player);
     }
@@ -290,7 +504,7 @@ function updatePlayer() {
 
 // 更新敌人
 function updateEnemies() {
-    enemies.forEach((enemy, index) => {
+    enemies.forEach((enemy) => {
         enemy.moveTimer++;
 
         if (enemy.moveTimer >= enemy.moveDuration) {
@@ -384,6 +598,8 @@ function shoot(tank) {
         direction: tank.direction,
         isPlayer: tank.isPlayer
     });
+
+    playShootSound(tank.isPlayer);
 }
 
 // 更新子弹
@@ -459,6 +675,8 @@ function createExplosion(x, y, size) {
         life: 20,
         maxLife: 20
     });
+
+    playExplosionSound(size);
 }
 
 // 更新爆炸效果
@@ -475,6 +693,7 @@ function checkGameState() {
     if (enemies.length === 0 && gameState.enemiesRemaining <= enemies.length) {
         gameState.level++;
         gameState.score += 500;
+        playLevelCompleteSound();
         setTimeout(() => {
             if (gameState.running) {
                 initLevel();
@@ -486,7 +705,13 @@ function checkGameState() {
 // 游戏结束
 function gameOver(victory) {
     gameState.running = false;
-    
+    playGameOverSound();
+
+    // 确保移动音效停止
+    if (movementPlaying) {
+        stopMovementSound();
+    }
+
     document.getElementById('gameOverTitle').textContent = victory ? '🎉 胜利！' : '💀 游戏结束';
     document.getElementById('finalScore').textContent = `最终分数: ${gameState.score}`;
     document.getElementById('finalLevel').textContent = `关卡: ${gameState.level}`;

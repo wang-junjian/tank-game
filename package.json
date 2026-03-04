@@ -1,0 +1,22 @@
+{
+  "name": "tank-game",
+  "version": "1.0.0",
+  "description": "一个基于 HTML5 Canvas 和原生 JavaScript 开发的经典坦克游戏克隆，致敬任天堂的《坦克大战》（Battle City）。",
+  "main": "game.js",
+  "scripts": {
+    "start": "serve -p 8000",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/wang-junjian/tank-game.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "type": "commonjs",
+  "bugs": {
+    "url": "https://github.com/wang-junjian/tank-game/issues"
+  },
+  "homepage": "https://github.com/wang-junjian/tank-game#readme"
+}
