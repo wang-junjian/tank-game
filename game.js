@@ -1093,12 +1093,36 @@ function shoot(tank, now) {
         // 副子弹
         const angleOffset = Math.PI / 6;
         for (let i = -1; i <= 1; i += 2) {
-            const angle = tank.direction.angle + angleOffset * i;
-            const direction = {
-                x: Math.cos(angle),
-                y: Math.sin(angle),
-                angle: angle
-            };
+            let direction;
+            if (tank.direction === DIRECTIONS.UP) {
+                // 向上时，向左上方和右上方散射
+                direction = {
+                    x: Math.sin(angleOffset * i),
+                    y: -Math.cos(angleOffset * i),
+                    angle: tank.direction.angle + angleOffset * i
+                };
+            } else if (tank.direction === DIRECTIONS.DOWN) {
+                // 向下时，向左下方和右下方散射
+                direction = {
+                    x: Math.sin(angleOffset * i),
+                    y: Math.cos(angleOffset * i),
+                    angle: tank.direction.angle + angleOffset * i
+                };
+            } else if (tank.direction === DIRECTIONS.LEFT) {
+                // 向左时，向左上方和左下方散射
+                direction = {
+                    x: -Math.cos(angleOffset * i),
+                    y: Math.sin(angleOffset * i),
+                    angle: tank.direction.angle + angleOffset * i
+                };
+            } else if (tank.direction === DIRECTIONS.RIGHT) {
+                // 向右时，向右上方和右下方散射
+                direction = {
+                    x: Math.cos(angleOffset * i),
+                    y: Math.sin(angleOffset * i),
+                    angle: tank.direction.angle + angleOffset * i
+                };
+            }
             bullets.push({
                 x: bulletX,
                 y: bulletY,
