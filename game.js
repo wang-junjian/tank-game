@@ -235,7 +235,8 @@ const GAME_CONFIG = {
 };
 
 // 游戏常量
-const TILE_SIZE = 32;
+// 增大游戏尺寸以适应现代屏幕
+const TILE_SIZE = 40;  // 从 32 增加到 40，增大 25%
 const GRID_SIZE = 20;
 const CANVAS_SIZE = TILE_SIZE * GRID_SIZE;
 
@@ -626,11 +627,12 @@ function stopPowerupSpawnTimer() {
 
 // 创建单个道具
 function createPowerup(type, x, y) {
+    const powerupSize = 20; // 从 16 增加到 20，与 TILE_SIZE 比例保持一致
     return {
-        x: x * TILE_SIZE + TILE_SIZE / 2 - 8,
-        y: y * TILE_SIZE + TILE_SIZE / 2 - 8,
-        width: 16,
-        height: 16,
+        x: x * TILE_SIZE + TILE_SIZE / 2 - powerupSize / 2,
+        y: y * TILE_SIZE + TILE_SIZE / 2 - powerupSize / 2,
+        width: powerupSize,
+        height: powerupSize,
         type: type,
         life: GAME_CONFIG.powerup.lifetime + Math.random() * GAME_CONFIG.powerup.lifetimeVariance,
         spawnTime: Date.now()
@@ -1073,8 +1075,8 @@ function shoot(tank, now) {
 
     tank.lastShot = now;
 
-    const bulletX = tank.x + tank.width / 2 - 3 + tank.direction.x * (tank.width / 2);
-    const bulletY = tank.y + tank.height / 2 - 3 + tank.direction.y * (tank.height / 2);
+    const bulletX = tank.x + tank.width / 2 - 4 + tank.direction.x * (tank.width / 2);
+    const bulletY = tank.y + tank.height / 2 - 4 + tank.direction.y * (tank.height / 2);
 
     // 火力增强：多发子弹
     if (tank.isPlayer && playerState.firePowerBoost > now) {
@@ -1082,8 +1084,8 @@ function shoot(tank, now) {
         bullets.push({
             x: bulletX,
             y: bulletY,
-            width: 6,
-            height: 6,
+            width: 8,
+            height: 8,
             speed: GAME_CONFIG.bullet.powerupSpeed,
             direction: tank.direction,
             isPlayer: tank.isPlayer,
@@ -1139,8 +1141,8 @@ function shoot(tank, now) {
         bullets.push({
             x: bulletX,
             y: bulletY,
-            width: 6,
-            height: 6,
+            width: 8,
+            height: 8,
             speed: tank.isPlayer ? GAME_CONFIG.bullet.playerSpeed : GAME_CONFIG.bullet.enemySpeed,
             direction: tank.direction,
             isPlayer: tank.isPlayer,
@@ -1231,8 +1233,8 @@ function updateBullets(now) {
 function createExplosion(x, y, size) {
     explosions.push({
         x, y,
-        size: size === 'large' ? 40 : 20,
-        maxSize: size === 'large' ? 40 : 20,
+        size: size === 'large' ? 50 : 25,  // 增大爆炸效果尺寸
+        maxSize: size === 'large' ? 50 : 25,
         life: 20,
         maxLife: 20
     });
