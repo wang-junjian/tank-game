@@ -946,8 +946,9 @@ function updatePlayer(now) {
     player.direction = newDirection;
 
     if (moving) {
-        const newX = player.x + player.direction.x * player.speed;
-        const newY = player.y + player.direction.y * player.speed;
+        const speed = playerState.speedBoost > now ? player.speed * 1.5 : player.speed; // 速度提升50%
+        const newX = player.x + player.direction.x * speed;
+        const newY = player.y + player.direction.y * speed;
 
         if (!checkTankCollision(player, newX, newY)) {
             player.x = newX;
