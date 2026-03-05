@@ -279,7 +279,8 @@ let gameState = {
     score: 0,
     level: 1,
     lives: 3,
-    enemiesRemaining: 0
+    enemiesRemaining: 0,
+    levelComplete: false // 防止重复触发关卡完成
 };
 
 // 玩家状态
@@ -758,6 +759,7 @@ function applyPowerup(type, now) {
                 createExplosion(enemy.x + enemy.width / 2, enemy.y + enemy.height / 2, 'large');
                 gameState.score += GAME_CONFIG.game.baseScorePerEnemy;
             });
+            gameState.enemiesRemaining = 0; // 所有敌人都被消灭
             enemies = [];
             updateUI();
             break;
@@ -1172,6 +1174,7 @@ function updateBullets(now) {
                     createExplosion(enemies[i].x + enemies[i].width / 2, enemies[i].y + enemies[i].height / 2, 'large');
                     enemies.splice(i, 1);
                     gameState.score += GAME_CONFIG.game.baseScorePerEnemy;
+                    gameState.enemiesRemaining--; // 减少剩余敌人数量
                     updateUI();
                     return false;
                 }
@@ -1223,12 +1226,14 @@ function updateExplosions() {
 
 // 检查游戏状态
 function checkGameState() {
-    if (enemies.length === 0 && gameState.enemiesRemaining <= enemies.length) {
+    if (enemies.length === 0 && gameState.enemiesRemaining <= 0 && !gameState.levelComplete) {
+        gameState.levelComplete = true; // 设置标志防止重复触发
         gameState.level++;
         gameState.score += GAME_CONFIG.game.levelCompleteBonus;
         playLevelCompleteSound();
         setTimeout(() => {
             if (gameState.running) {
+                gameState.levelComplete = false; // 重置标志
                 initLevel();
             }
         }, 1000);
