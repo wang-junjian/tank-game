@@ -180,13 +180,67 @@ function playGameOverSound() {
     });
 }
 
+// 游戏配置 - 可通过界面配置的参数
+const GAME_CONFIG = {
+    // 玩家配置
+    player: {
+        speed: 2,
+        shootCooldown: 300,
+        initialLives: 3
+    },
+    // 敌人配置
+    enemy: {
+        baseSpeed: 1,
+        speedIncreasePerLevel: 0.2,
+        shootCooldown: 1000,
+        cooldownVariance: 500,
+        initialCount: 4,
+        countIncreasePerLevel: 1,
+        maxCount: 8,
+        spawnDelay: 1500
+    },
+    // 子弹配置
+    bullet: {
+        playerSpeed: 5,
+        enemySpeed: 4,
+        powerupSpeed: 7
+    },
+    // 道具配置
+    powerup: {
+        spawnInterval: 5000,
+        intervalVariance: 10000,
+        lifetime: 5000,
+        lifetimeVariance: 2000,
+        effectDuration: 10000
+    },
+    // 地图配置
+    map: {
+        initialBricks: 80,
+        bricksPerLevel: 10,
+        initialSteel: 10,
+        steelPerLevel: 2,
+        waterCount: 5,
+        forestCount: 15
+    },
+    // 音效配置
+    sound: {
+        enabled: true,
+        volume: 0.5
+    },
+    // 游戏配置
+    game: {
+        baseScorePerEnemy: 100,
+        levelCompleteBonus: 500
+    }
+};
+
 // 游戏常量
 const TILE_SIZE = 32;
 const GRID_SIZE = 20;
 const CANVAS_SIZE = TILE_SIZE * GRID_SIZE;
 
 // 音效开关
-let soundEnabled = true;
+let soundEnabled = GAME_CONFIG.sound.enabled;
 
 // 方向
 const DIRECTIONS = {
@@ -271,12 +325,226 @@ function setupEventListeners() {
         UI_ELEMENTS.soundBtn.textContent = soundEnabled ? '开启' : '关闭';
         UI_ELEMENTS.soundBtn.style.background = soundEnabled ? '#4CAF50' : '#f44336';
     });
+
+    // 配置界面事件
+    UI_ELEMENTS.configBtn.addEventListener('click', showConfigScreen);
+    UI_ELEMENTS.closeConfigBtn.addEventListener('click', hideConfigScreen);
+    UI_ELEMENTS.saveConfigBtn.addEventListener('click', saveConfig);
+    UI_ELEMENTS.resetConfigBtn.addEventListener('click', resetConfig);
+
+    // 配置界面输入同步
+    setupConfigInputSync();
 }
 
 // 显示开始屏幕
 function showStartScreen() {
     UI_ELEMENTS.startScreen.classList.remove('hidden');
     UI_ELEMENTS.gameOverScreen.classList.add('hidden');
+    UI_ELEMENTS.configScreen.classList.add('hidden');
+}
+
+// 显示配置界面
+function showConfigScreen() {
+    UI_ELEMENTS.configScreen.classList.remove('hidden');
+    // 加载当前配置到界面
+    loadConfigToUI();
+}
+
+// 隐藏配置界面
+function hideConfigScreen() {
+    UI_ELEMENTS.configScreen.classList.add('hidden');
+}
+
+// 加载配置到界面
+function loadConfigToUI() {
+    // 玩家配置
+    UI_ELEMENTS.playerSpeed.value = GAME_CONFIG.player.speed;
+    UI_ELEMENTS.playerSpeedNum.value = GAME_CONFIG.player.speed;
+    UI_ELEMENTS.playerCooldown.value = GAME_CONFIG.player.shootCooldown;
+    UI_ELEMENTS.playerCooldownNum.value = GAME_CONFIG.player.shootCooldown;
+    UI_ELEMENTS.initialLives.value = GAME_CONFIG.player.initialLives;
+    UI_ELEMENTS.initialLivesNum.value = GAME_CONFIG.player.initialLives;
+
+    // 敌人配置
+    UI_ELEMENTS.enemySpeed.value = GAME_CONFIG.enemy.baseSpeed;
+    UI_ELEMENTS.enemySpeedNum.value = GAME_CONFIG.enemy.baseSpeed;
+    UI_ELEMENTS.enemySpeedIncrease.value = GAME_CONFIG.enemy.speedIncreasePerLevel;
+    UI_ELEMENTS.enemySpeedIncreaseNum.value = GAME_CONFIG.enemy.speedIncreasePerLevel;
+    UI_ELEMENTS.enemyCount.value = GAME_CONFIG.enemy.initialCount;
+    UI_ELEMENTS.enemyCountNum.value = GAME_CONFIG.enemy.initialCount;
+    UI_ELEMENTS.enemyCountIncrease.value = GAME_CONFIG.enemy.countIncreasePerLevel;
+    UI_ELEMENTS.enemyCountIncreaseNum.value = GAME_CONFIG.enemy.countIncreasePerLevel;
+    UI_ELEMENTS.enemyMaxCount.value = GAME_CONFIG.enemy.maxCount;
+    UI_ELEMENTS.enemyMaxCountNum.value = GAME_CONFIG.enemy.maxCount;
+
+    // 道具配置
+    UI_ELEMENTS.powerupInterval.value = GAME_CONFIG.powerup.spawnInterval;
+    UI_ELEMENTS.powerupIntervalNum.value = GAME_CONFIG.powerup.spawnInterval;
+    UI_ELEMENTS.powerupDuration.value = GAME_CONFIG.powerup.effectDuration;
+    UI_ELEMENTS.powerupDurationNum.value = GAME_CONFIG.powerup.effectDuration;
+    UI_ELEMENTS.powerupLifetime.value = GAME_CONFIG.powerup.lifetime;
+    UI_ELEMENTS.powerupLifetimeNum.value = GAME_CONFIG.powerup.lifetime;
+
+    // 地图配置
+    UI_ELEMENTS.initialBricks.value = GAME_CONFIG.map.initialBricks;
+    UI_ELEMENTS.initialBricksNum.value = GAME_CONFIG.map.initialBricks;
+    UI_ELEMENTS.bricksPerLevel.value = GAME_CONFIG.map.bricksPerLevel;
+    UI_ELEMENTS.bricksPerLevelNum.value = GAME_CONFIG.map.bricksPerLevel;
+    UI_ELEMENTS.initialSteel.value = GAME_CONFIG.map.initialSteel;
+    UI_ELEMENTS.initialSteelNum.value = GAME_CONFIG.map.initialSteel;
+    UI_ELEMENTS.steelPerLevel.value = GAME_CONFIG.map.steelPerLevel;
+    UI_ELEMENTS.steelPerLevelNum.value = GAME_CONFIG.map.steelPerLevel;
+
+    // 音效配置
+    UI_ELEMENTS.soundEnabled.checked = GAME_CONFIG.sound.enabled;
+    UI_ELEMENTS.soundVolume.value = GAME_CONFIG.sound.volume;
+    UI_ELEMENTS.soundVolumeNum.value = GAME_CONFIG.sound.volume;
+}
+
+// 保存配置
+function saveConfig() {
+    // 玩家配置
+    GAME_CONFIG.player.speed = parseFloat(UI_ELEMENTS.playerSpeed.value);
+    GAME_CONFIG.player.shootCooldown = parseInt(UI_ELEMENTS.playerCooldown.value);
+    GAME_CONFIG.player.initialLives = parseInt(UI_ELEMENTS.initialLives.value);
+
+    // 敌人配置
+    GAME_CONFIG.enemy.baseSpeed = parseFloat(UI_ELEMENTS.enemySpeed.value);
+    GAME_CONFIG.enemy.speedIncreasePerLevel = parseFloat(UI_ELEMENTS.enemySpeedIncrease.value);
+    GAME_CONFIG.enemy.initialCount = parseInt(UI_ELEMENTS.enemyCount.value);
+    GAME_CONFIG.enemy.countIncreasePerLevel = parseInt(UI_ELEMENTS.enemyCountIncrease.value);
+    GAME_CONFIG.enemy.maxCount = parseInt(UI_ELEMENTS.enemyMaxCount.value);
+
+    // 道具配置
+    GAME_CONFIG.powerup.spawnInterval = parseInt(UI_ELEMENTS.powerupInterval.value);
+    GAME_CONFIG.powerup.effectDuration = parseInt(UI_ELEMENTS.powerupDuration.value);
+    GAME_CONFIG.powerup.lifetime = parseInt(UI_ELEMENTS.powerupLifetime.value);
+
+    // 地图配置
+    GAME_CONFIG.map.initialBricks = parseInt(UI_ELEMENTS.initialBricks.value);
+    GAME_CONFIG.map.bricksPerLevel = parseInt(UI_ELEMENTS.bricksPerLevel.value);
+    GAME_CONFIG.map.initialSteel = parseInt(UI_ELEMENTS.initialSteel.value);
+    GAME_CONFIG.map.steelPerLevel = parseInt(UI_ELEMENTS.steelPerLevel.value);
+
+    // 音效配置
+    GAME_CONFIG.sound.enabled = UI_ELEMENTS.soundEnabled.checked;
+    GAME_CONFIG.sound.volume = parseFloat(UI_ELEMENTS.soundVolume.value);
+    soundEnabled = GAME_CONFIG.sound.enabled;
+
+    // 更新音效按钮显示
+    UI_ELEMENTS.soundBtn.textContent = soundEnabled ? '开启' : '关闭';
+    UI_ELEMENTS.soundBtn.style.background = soundEnabled ? '#4CAF50' : '#f44336';
+
+    hideConfigScreen();
+}
+
+// 重置配置为默认值
+function resetConfig() {
+    // 重置为默认值
+    const DEFAULT_CONFIG = {
+        player: {
+            speed: 2,
+            shootCooldown: 300,
+            initialLives: 3
+        },
+        enemy: {
+            baseSpeed: 1,
+            speedIncreasePerLevel: 0.2,
+            shootCooldown: 1000,
+            cooldownVariance: 500,
+            initialCount: 4,
+            countIncreasePerLevel: 1,
+            maxCount: 8,
+            spawnDelay: 1500
+        },
+        bullet: {
+            playerSpeed: 5,
+            enemySpeed: 4,
+            powerupSpeed: 7
+        },
+        powerup: {
+            spawnInterval: 5000,
+            intervalVariance: 10000,
+            lifetime: 5000,
+            lifetimeVariance: 2000,
+            effectDuration: 10000
+        },
+        map: {
+            initialBricks: 80,
+            bricksPerLevel: 10,
+            initialSteel: 10,
+            steelPerLevel: 2,
+            waterCount: 5,
+            forestCount: 15
+        },
+        sound: {
+            enabled: true,
+            volume: 0.5
+        },
+        game: {
+            baseScorePerEnemy: 100,
+            levelCompleteBonus: 500
+        }
+    };
+
+    // 复制默认配置到 GAME_CONFIG
+    Object.assign(GAME_CONFIG, JSON.parse(JSON.stringify(DEFAULT_CONFIG)));
+
+    // 加载到界面
+    loadConfigToUI();
+}
+
+// 设置配置界面输入同步
+function setupConfigInputSync() {
+    // 玩家配置
+    syncInput('playerSpeed');
+    syncInput('playerCooldown');
+    syncInput('initialLives');
+    // 敌人配置
+    syncInput('enemySpeed');
+    syncInput('enemySpeedIncrease');
+    syncInput('enemyCount');
+    syncInput('enemyCountIncrease');
+    syncInput('enemyMaxCount');
+    // 道具配置
+    syncInput('powerupInterval');
+    syncInput('powerupDuration');
+    syncInput('powerupLifetime');
+    // 地图配置
+    syncInput('initialBricks');
+    syncInput('bricksPerLevel');
+    syncInput('initialSteel');
+    syncInput('steelPerLevel');
+    // 音效配置
+    syncInput('soundVolume');
+}
+
+// 同步输入框
+function syncInput(field) {
+    const slider = UI_ELEMENTS[field];
+    const numberInput = UI_ELEMENTS[`${field}Num`];
+
+    if (slider && numberInput) {
+        slider.addEventListener('input', () => {
+            numberInput.value = slider.value;
+        });
+
+        numberInput.addEventListener('input', () => {
+            const value = parseFloat(numberInput.value);
+            const min = parseFloat(slider.min);
+            const max = parseFloat(slider.max);
+            const step = parseFloat(slider.step);
+
+            let validValue = value;
+            if (validValue < min) validValue = min;
+            if (validValue > max) validValue = max;
+            // 确保值是 step 的倍数
+            validValue = Math.round(validValue / step) * step;
+
+            numberInput.value = validValue;
+            slider.value = validValue;
+        });
+    }
 }
 
 // 开始游戏
@@ -286,8 +554,8 @@ function startGame() {
         running: true,
         score: 0,
         level: 1,
-        lives: 3,
-        enemiesRemaining: 4
+        lives: GAME_CONFIG.player.initialLives,
+        enemiesRemaining: GAME_CONFIG.enemy.initialCount
     };
 
     UI_ELEMENTS.startScreen.classList.add('hidden');
@@ -340,7 +608,7 @@ function startPowerupSpawnTimer() {
     }
 
     // 随机时间后生成下一个道具
-    const spawnDelay = 5000 + Math.random() * 10000; // 5-15秒
+    const spawnDelay = GAME_CONFIG.powerup.spawnInterval + Math.random() * GAME_CONFIG.powerup.intervalVariance;
     powerupSpawnTimer = setTimeout(() => {
         spawnRandomPowerup();
         startPowerupSpawnTimer(); // 递归调用，继续生成道具
@@ -363,7 +631,7 @@ function createPowerup(type, x, y) {
         width: 16,
         height: 16,
         type: type,
-        life: 3000 + Math.random() * 2000, // 3-5秒后消失
+        life: GAME_CONFIG.powerup.lifetime + Math.random() * GAME_CONFIG.powerup.lifetimeVariance,
         spawnTime: Date.now()
     };
 }
@@ -444,10 +712,10 @@ function generateMap() {
     });
 
     // 随机放置地图元素
-    placeRandomTiles(TILE_TYPES.BRICK, 80 + gameState.level * 10, [2, GRID_SIZE - 2]);
-    placeRandomTiles(TILE_TYPES.STEEL, 10 + gameState.level * 2, [2, GRID_SIZE - 2]);
-    placeRandomTiles(TILE_TYPES.WATER, 5, [3, GRID_SIZE - 3]);
-    placeRandomTiles(TILE_TYPES.FOREST, 15, [2, GRID_SIZE - 2]);
+    placeRandomTiles(TILE_TYPES.BRICK, GAME_CONFIG.map.initialBricks + gameState.level * GAME_CONFIG.map.bricksPerLevel, [2, GRID_SIZE - 2]);
+    placeRandomTiles(TILE_TYPES.STEEL, GAME_CONFIG.map.initialSteel + gameState.level * GAME_CONFIG.map.steelPerLevel, [2, GRID_SIZE - 2]);
+    placeRandomTiles(TILE_TYPES.WATER, GAME_CONFIG.map.waterCount, [3, GRID_SIZE - 3]);
+    placeRandomTiles(TILE_TYPES.FOREST, GAME_CONFIG.map.forestCount, [2, GRID_SIZE - 2]);
 }
 
 // 生成道具
@@ -472,13 +740,13 @@ function updatePowerups(now) {
 function applyPowerup(type, now) {
     switch (type) {
         case POWERUP_TYPES.SPEED:
-            playerState.speedBoost = now + 10000;
+            playerState.speedBoost = now + GAME_CONFIG.powerup.effectDuration;
             break;
         case POWERUP_TYPES.FIREPOWER:
-            playerState.firePowerBoost = now + 10000;
+            playerState.firePowerBoost = now + GAME_CONFIG.powerup.effectDuration;
             break;
         case POWERUP_TYPES.SHIELD:
-            playerState.shield = now + 10000;
+            playerState.shield = now + GAME_CONFIG.powerup.effectDuration;
             break;
         case POWERUP_TYPES.LIFE:
             gameState.lives++;
@@ -488,17 +756,17 @@ function applyPowerup(type, now) {
             // 炸弹：消灭所有敌人
             enemies.forEach(enemy => {
                 createExplosion(enemy.x + enemy.width / 2, enemy.y + enemy.height / 2, 'large');
-                gameState.score += 100;
+                gameState.score += GAME_CONFIG.game.baseScorePerEnemy;
             });
             enemies = [];
             updateUI();
             break;
         case POWERUP_TYPES.FREEZE:
             // 冻结敌人
-            playerState.freezeActive = now + 5000;
+            playerState.freezeActive = now + GAME_CONFIG.powerup.effectDuration / 2;
             enemies.forEach(enemy => {
                 enemy.frozen = true;
-                enemy.freezeTime = now + 5000;
+                enemy.freezeTime = now + GAME_CONFIG.powerup.effectDuration / 2;
             });
             break;
     }
@@ -511,12 +779,12 @@ function createPlayer() {
         y: 17 * TILE_SIZE,
         width: TILE_SIZE - 4,
         height: TILE_SIZE - 4,
-        speed: 2,
+        speed: GAME_CONFIG.player.speed,
         direction: DIRECTIONS.UP,
         color: '#4CAF50',
         isPlayer: true,
         lastShot: 0,
-        shootCooldown: 300
+        shootCooldown: GAME_CONFIG.player.shootCooldown
     };
 }
 
@@ -531,7 +799,7 @@ function spawnEnemies() {
         { x: 18 * TILE_SIZE, y: 1 * TILE_SIZE }
     ];
 
-    const enemyCount = Math.min(4 + gameState.level, 8);
+    const enemyCount = Math.min(GAME_CONFIG.enemy.initialCount + gameState.level * GAME_CONFIG.enemy.countIncreasePerLevel, GAME_CONFIG.enemy.maxCount);
     gameState.enemiesRemaining = enemyCount;
 
     // 清除之前的计时器
@@ -546,17 +814,17 @@ function spawnEnemies() {
                     y: spawn.y,
                     width: TILE_SIZE - 4,
                     height: TILE_SIZE - 4,
-                    speed: 1 + gameState.level * 0.2,
+                    speed: GAME_CONFIG.enemy.baseSpeed + gameState.level * GAME_CONFIG.enemy.speedIncreasePerLevel,
                     direction: DIRECTIONS.DOWN,
                     color: '#f44336',
                     isPlayer: false,
                     lastShot: 0,
-                    shootCooldown: 1000 + Math.random() * 500,
+                    shootCooldown: GAME_CONFIG.enemy.shootCooldown + Math.random() * GAME_CONFIG.enemy.cooldownVariance,
                     moveTimer: 0,
                     moveDuration: 60 + Math.random() * 60
                 });
             }
-        }, i * 1500);
+        }, i * GAME_CONFIG.enemy.spawnDelay);
 
         enemySpawnTimeouts.push(timeoutId);
     }
@@ -576,12 +844,51 @@ const UI_ELEMENTS = {
     enemies: document.getElementById('enemies'),
     startScreen: document.getElementById('startScreen'),
     gameOverScreen: document.getElementById('gameOverScreen'),
+    configScreen: document.getElementById('configScreen'),
     startBtn: document.getElementById('startBtn'),
     restartBtn: document.getElementById('restartBtn'),
     soundBtn: document.getElementById('soundBtn'),
+    configBtn: document.getElementById('configBtn'),
+    saveConfigBtn: document.getElementById('saveConfigBtn'),
+    resetConfigBtn: document.getElementById('resetConfigBtn'),
+    closeConfigBtn: document.getElementById('closeConfigBtn'),
     gameOverTitle: document.getElementById('gameOverTitle'),
     finalScore: document.getElementById('finalScore'),
-    finalLevel: document.getElementById('finalLevel')
+    finalLevel: document.getElementById('finalLevel'),
+    // 配置界面元素
+    playerSpeed: document.getElementById('playerSpeed'),
+    playerSpeedNum: document.getElementById('playerSpeedNum'),
+    playerCooldown: document.getElementById('playerCooldown'),
+    playerCooldownNum: document.getElementById('playerCooldownNum'),
+    initialLives: document.getElementById('initialLives'),
+    initialLivesNum: document.getElementById('initialLivesNum'),
+    enemySpeed: document.getElementById('enemySpeed'),
+    enemySpeedNum: document.getElementById('enemySpeedNum'),
+    enemySpeedIncrease: document.getElementById('enemySpeedIncrease'),
+    enemySpeedIncreaseNum: document.getElementById('enemySpeedIncreaseNum'),
+    enemyCount: document.getElementById('enemyCount'),
+    enemyCountNum: document.getElementById('enemyCountNum'),
+    enemyCountIncrease: document.getElementById('enemyCountIncrease'),
+    enemyCountIncreaseNum: document.getElementById('enemyCountIncreaseNum'),
+    enemyMaxCount: document.getElementById('enemyMaxCount'),
+    enemyMaxCountNum: document.getElementById('enemyMaxCountNum'),
+    powerupInterval: document.getElementById('powerupInterval'),
+    powerupIntervalNum: document.getElementById('powerupIntervalNum'),
+    powerupDuration: document.getElementById('powerupDuration'),
+    powerupDurationNum: document.getElementById('powerupDurationNum'),
+    powerupLifetime: document.getElementById('powerupLifetime'),
+    powerupLifetimeNum: document.getElementById('powerupLifetimeNum'),
+    initialBricks: document.getElementById('initialBricks'),
+    initialBricksNum: document.getElementById('initialBricksNum'),
+    bricksPerLevel: document.getElementById('bricksPerLevel'),
+    bricksPerLevelNum: document.getElementById('bricksPerLevelNum'),
+    initialSteel: document.getElementById('initialSteel'),
+    initialSteelNum: document.getElementById('initialSteelNum'),
+    steelPerLevel: document.getElementById('steelPerLevel'),
+    steelPerLevelNum: document.getElementById('steelPerLevelNum'),
+    soundEnabled: document.getElementById('soundEnabled'),
+    soundVolume: document.getElementById('soundVolume'),
+    soundVolumeNum: document.getElementById('soundVolumeNum')
 };
 
 // 更新UI
@@ -756,8 +1063,8 @@ function checkTankCollision(tank, newX, newY) {
 // 射击
 function shoot(tank, now) {
     const cooldown = tank.isPlayer ?
-        (playerState.firePowerBoost > now ? 150 : 300) :
-        (1000 + Math.random() * 500);
+        (playerState.firePowerBoost > now ? GAME_CONFIG.player.shootCooldown / 2 : GAME_CONFIG.player.shootCooldown) :
+        (GAME_CONFIG.enemy.shootCooldown + Math.random() * GAME_CONFIG.enemy.cooldownVariance);
 
     if (now - tank.lastShot < cooldown) return;
 
@@ -774,7 +1081,7 @@ function shoot(tank, now) {
             y: bulletY,
             width: 6,
             height: 6,
-            speed: 7,
+            speed: GAME_CONFIG.bullet.powerupSpeed,
             direction: tank.direction,
             isPlayer: tank.isPlayer,
             power: 2
@@ -807,7 +1114,7 @@ function shoot(tank, now) {
             y: bulletY,
             width: 6,
             height: 6,
-            speed: tank.isPlayer ? 5 : 4,
+            speed: tank.isPlayer ? GAME_CONFIG.bullet.playerSpeed : GAME_CONFIG.bullet.enemySpeed,
             direction: tank.direction,
             isPlayer: tank.isPlayer,
             power: 1
@@ -864,7 +1171,7 @@ function updateBullets(now) {
                 if (rectCollision(bullet.x, bullet.y, bullet.width, bullet.height, enemies[i].x, enemies[i].y, enemies[i].width, enemies[i].height)) {
                     createExplosion(enemies[i].x + enemies[i].width / 2, enemies[i].y + enemies[i].height / 2, 'large');
                     enemies.splice(i, 1);
-                    gameState.score += 100;
+                    gameState.score += GAME_CONFIG.game.baseScorePerEnemy;
                     updateUI();
                     return false;
                 }
@@ -918,7 +1225,7 @@ function updateExplosions() {
 function checkGameState() {
     if (enemies.length === 0 && gameState.enemiesRemaining <= enemies.length) {
         gameState.level++;
-        gameState.score += 500;
+        gameState.score += GAME_CONFIG.game.levelCompleteBonus;
         playLevelCompleteSound();
         setTimeout(() => {
             if (gameState.running) {
