@@ -1334,36 +1334,21 @@ function renderPowerups(now) {
     powerups.forEach(powerup => {
         ctx.save();
 
-        const remainingLife = powerup.life - (now - powerup.spawnTime);
-        const blinkThreshold = 1500; // 最后 1.5 秒开始闪烁
-        let isVisible = true;
+        // 闪烁效果
+        const pulse = Math.sin(now / 300) * 0.3 + 0.7;
 
-        // 道具快要消失时闪烁3次
-        if (remainingLife < blinkThreshold) {
-            // 闪烁频率：每次闪烁持续约 200ms，3次闪烁共约 1.2秒
-            const blinkInterval = 200;
-            const blinkPhase = Math.floor((blinkThreshold - remainingLife) / blinkInterval);
-            // 第0、2、4阶段显示，第1、3、5阶段隐藏（3次闪烁）
-            isVisible = blinkPhase % 2 === 0;
-        }
+        const config = POWERUP_CONFIG[powerup.type];
+        if (config) {
+            // 绘制道具背景
+            ctx.fillStyle = config.color.replace('{pulse}', pulse);
+            ctx.fillRect(powerup.x, powerup.y, powerup.width, powerup.height);
 
-        if (isVisible) {
-            // 正常闪烁效果
-            const pulse = Math.sin(now / 300) * 0.3 + 0.7;
-
-            const config = POWERUP_CONFIG[powerup.type];
-            if (config) {
-                // 绘制道具背景
-                ctx.fillStyle = config.color.replace('{pulse}', pulse);
-                ctx.fillRect(powerup.x, powerup.y, powerup.width, powerup.height);
-
-                // 绘制道具图标
-                ctx.fillStyle = '#fff';
-                ctx.font = '12px Arial';
-                ctx.textAlign = 'center';
-                ctx.textBaseline = 'middle';
-                ctx.fillText(config.icon, powerup.x + powerup.width / 2, powerup.y + powerup.height / 2);
-            }
+            // 绘制道具图标
+            ctx.fillStyle = '#fff';
+            ctx.font = '12px Arial';
+            ctx.textAlign = 'center';
+            ctx.textBaseline = 'middle';
+            ctx.fillText(config.icon, powerup.x + powerup.width / 2, powerup.y + powerup.height / 2);
         }
 
         ctx.restore();
