@@ -277,19 +277,24 @@ let powerups = [];
 // 游戏状态
 let gameState = {
     running: false,
+    paused: false,
     score: 0,
     level: 1,
     lives: 3,
     enemiesRemaining: 0,
-    levelComplete: false // 防止重复触发关卡完成
+    levelComplete: false, // 防止重复触发关卡完成
+    gameStartTime: 0, // 游戏开始时间
+    gamePausedTime: 0, // 暂停时的时间点
+    totalPausedDuration: 0, // 总共暂停的时间
+    enemiesKilled: 0 // 已消灭敌人数量
 };
 
-// 玩家状态
+// 玩家状态 - 同时记录结束时间和持续时间
 let playerState = {
-    speedBoost: 0,
-    firePowerBoost: 0,
-    shield: 0,
-    freezeActive: 0
+    speedBoost: { endTime: 0, duration: 0 },
+    firePowerBoost: { endTime: 0, duration: 0 },
+    shield: { endTime: 0, duration: 0 },
+    freezeActive: { endTime: 0, duration: 0 }
 };
 
 // 游戏对象
@@ -305,6 +310,7 @@ const keys = {};
 // 初始化
 function init() {
     setupEventListeners();
+    updateHighScore();
     showStartScreen();
 }
 
@@ -326,7 +332,18 @@ function setupEventListeners() {
         soundEnabled = !soundEnabled;
         UI_ELEMENTS.soundBtn.textContent = soundEnabled ? '开启' : '关闭';
         UI_ELEMENTS.soundBtn.style.background = soundEnabled ? '#4CAF50' : '#f44336';
+        updateSidebarSoundBtn();
     });
+
+    // 侧边栏按钮事件
+    UI_ELEMENTS.sidebarSoundBtn.addEventListener('click', () => {
+        soundEnabled = !soundEnabled;
+        UI_ELEMENTS.soundBtn.textContent = soundEnabled ? '开启' : '关闭';
+        UI_ELEMENTS.soundBtn.style.background = soundEnabled ? '#4CAF50' : '#f44336';
+        updateSidebarSoundBtn();
+    });
+
+    UI_ELEMENTS.sidebarPauseBtn.addEventListener('click', togglePause);
 
     // 配置界面事件
     UI_ELEMENTS.configBtn.addEventListener('click', showConfigScreen);
@@ -554,14 +571,25 @@ function startGame() {
     initAudio();
     gameState = {
         running: true,
+        paused: false,
         score: 0,
         level: 1,
         lives: GAME_CONFIG.player.initialLives,
-        enemiesRemaining: GAME_CONFIG.enemy.initialCount
+        enemiesRemaining: GAME_CONFIG.enemy.initialCount,
+        levelComplete: false,
+        gameStartTime: Date.now(),
+        gamePausedTime: 0,
+        totalPausedDuration: 0,
+        enemiesKilled: 0
     };
 
     UI_ELEMENTS.startScreen.classList.add('hidden');
     UI_ELEMENTS.gameOverScreen.classList.add('hidden');
+
+    // 初始化侧边栏
+    updateSidebarSoundBtn();
+    UI_ELEMENTS.sidebarPauseBtn.textContent = '⏸️ 暂停';
+    updateHighScore();
 
     initLevel();
     gameLoop();
@@ -573,16 +601,17 @@ function initLevel() {
     bullets = [];
     explosions = [];
     powerups = [];
+    gameState.enemiesKilled = 0;
 
     // 清除敌人生成计时器
     clearEnemySpawnTimeouts();
 
     // 重置玩家状态
     playerState = {
-        speedBoost: 0,
-        firePowerBoost: 0,
-        shield: 0,
-        freezeActive: 0
+        speedBoost: { endTime: 0, duration: 0 },
+        firePowerBoost: { endTime: 0, duration: 0 },
+        shield: { endTime: 0, duration: 0 },
+        freezeActive: { endTime: 0, duration: 0 }
     };
 
     // 确保移动音效停止
@@ -743,13 +772,16 @@ function updatePowerups(now) {
 function applyPowerup(type, now) {
     switch (type) {
         case POWERUP_TYPES.SPEED:
-            playerState.speedBoost = now + GAME_CONFIG.powerup.effectDuration;
+            playerState.speedBoost.endTime = now + GAME_CONFIG.powerup.effectDuration;
+            playerState.speedBoost.duration = GAME_CONFIG.powerup.effectDuration;
             break;
         case POWERUP_TYPES.FIREPOWER:
-            playerState.firePowerBoost = now + GAME_CONFIG.powerup.effectDuration;
+            playerState.firePowerBoost.endTime = now + GAME_CONFIG.powerup.effectDuration;
+            playerState.firePowerBoost.duration = GAME_CONFIG.powerup.effectDuration;
             break;
         case POWERUP_TYPES.SHIELD:
-            playerState.shield = now + GAME_CONFIG.powerup.effectDuration;
+            playerState.shield.endTime = now + GAME_CONFIG.powerup.effectDuration;
+            playerState.shield.duration = GAME_CONFIG.powerup.effectDuration;
             break;
         case POWERUP_TYPES.LIFE:
             gameState.lives++;
@@ -767,10 +799,12 @@ function applyPowerup(type, now) {
             break;
         case POWERUP_TYPES.FREEZE:
             // 冻结敌人
-            playerState.freezeActive = now + GAME_CONFIG.powerup.effectDuration / 2;
+            const freezeDuration = GAME_CONFIG.powerup.effectDuration / 2;
+            playerState.freezeActive.endTime = now + freezeDuration;
+            playerState.freezeActive.duration = freezeDuration;
             enemies.forEach(enemy => {
                 enemy.frozen = true;
-                enemy.freezeTime = now + GAME_CONFIG.powerup.effectDuration / 2;
+                enemy.freezeTime = now + freezeDuration;
             });
             break;
     }
@@ -859,6 +893,18 @@ const UI_ELEMENTS = {
     gameOverTitle: document.getElementById('gameOverTitle'),
     finalScore: document.getElementById('finalScore'),
     finalLevel: document.getElementById('finalLevel'),
+    // 侧边栏元素
+    sidebarScore: document.getElementById('sidebarScore'),
+    sidebarLevel: document.getElementById('sidebarLevel'),
+    sidebarEnemies: document.getElementById('sidebarEnemies'),
+    livesContainer: document.getElementById('livesContainer'),
+    enemyProgressFill: document.getElementById('enemyProgressFill'),
+    powerupsList: document.getElementById('powerupsList'),
+    gameTime: document.getElementById('gameTime'),
+    sidebarPauseBtn: document.getElementById('sidebarPauseBtn'),
+    sidebarSoundBtn: document.getElementById('sidebarSoundBtn'),
+    highScore: document.getElementById('highScore'),
+    enemiesKilled: document.getElementById('enemiesKilled'),
     // 配置界面元素
     playerSpeed: document.getElementById('playerSpeed'),
     playerSpeedNum: document.getElementById('playerSpeedNum'),
@@ -901,6 +947,190 @@ function updateUI() {
     UI_ELEMENTS.level.textContent = gameState.level;
     UI_ELEMENTS.lives.textContent = gameState.lives;
     UI_ELEMENTS.enemies.textContent = enemies.length;
+
+    // 更新侧边栏
+    updateSidebar();
+}
+
+// 更新侧边栏
+function updateSidebar() {
+    UI_ELEMENTS.sidebarScore.textContent = gameState.score;
+    UI_ELEMENTS.sidebarLevel.textContent = gameState.level;
+    UI_ELEMENTS.sidebarEnemies.textContent = enemies.length;
+    UI_ELEMENTS.enemiesKilled.textContent = gameState.enemiesKilled;
+
+    updateGameTime();
+    updateLivesDisplay();
+    updateEnemyProgress();
+    updatePowerupsDisplay();
+    updateHighScore();
+}
+
+// 更新游戏时间
+function updateGameTime() {
+    // 如果游戏未开始，显示 00:00
+    if (gameState.gameStartTime === 0) {
+        UI_ELEMENTS.gameTime.textContent = '00:00';
+        return;
+    }
+
+    // 如果暂停了，显示暂停时的时间
+    let elapsed;
+    if (gameState.paused) {
+        elapsed = gameState.gamePausedTime - gameState.gameStartTime - gameState.totalPausedDuration;
+    } else {
+        elapsed = Date.now() - gameState.gameStartTime - gameState.totalPausedDuration;
+    }
+
+    // 确保时间不小于0
+    elapsed = Math.max(0, elapsed);
+
+    const minutes = Math.floor(elapsed / 60000);
+    const seconds = Math.floor((elapsed % 60000) / 1000);
+    const formatted = `${String(minutes).padStart(2, '0')}:${String(seconds).padStart(2, '0')}`;
+    UI_ELEMENTS.gameTime.textContent = formatted;
+}
+
+// 更新生命值显示
+function updateLivesDisplay() {
+    const container = UI_ELEMENTS.livesContainer;
+    container.innerHTML = '';
+
+    for (let i = 0; i < 3; i++) {
+        const heart = document.createElement('span');
+        heart.className = 'heart';
+        heart.textContent = '❤️';
+
+        if (i >= gameState.lives) {
+            heart.classList.add('lost');
+        }
+
+        container.appendChild(heart);
+    }
+
+    // 心型动画效果
+    if (gameState.lives < 3) {
+        const hearts = container.querySelectorAll('.heart:not(.lost)');
+        hearts[hearts.length - 1]?.classList.add('pulse');
+        setTimeout(() => {
+            hearts[hearts.length - 1]?.classList.remove('pulse');
+        }, 300);
+    }
+}
+
+// 更新敌人进度条
+function updateEnemyProgress() {
+    const totalEnemies = Math.min(GAME_CONFIG.enemy.initialCount + gameState.level * GAME_CONFIG.enemy.countIncreasePerLevel, GAME_CONFIG.enemy.maxCount);
+    const killed = gameState.enemiesKilled;
+    const progress = totalEnemies > 0 ? (killed / totalEnemies) * 100 : 0;
+
+    UI_ELEMENTS.enemyProgressFill.style.width = `${progress}%`;
+}
+
+// 更新道具显示
+function updatePowerupsDisplay() {
+    const list = UI_ELEMENTS.powerupsList;
+    const activePowerups = [];
+    const now = Date.now();
+
+    // 检查活跃的道具
+    if (playerState.speedBoost.endTime > now) {
+        activePowerups.push({
+            name: '速度提升',
+            icon: '⚡',
+            startTime: playerState.speedBoost.endTime - playerState.speedBoost.duration,
+            duration: playerState.speedBoost.duration
+        });
+    }
+
+    if (playerState.firePowerBoost.endTime > now) {
+        activePowerups.push({
+            name: '火力增强',
+            icon: '🔥',
+            startTime: playerState.firePowerBoost.endTime - playerState.firePowerBoost.duration,
+            duration: playerState.firePowerBoost.duration
+        });
+    }
+
+    if (playerState.shield.endTime > now) {
+        activePowerups.push({
+            name: '护盾',
+            icon: '🛡️',
+            startTime: playerState.shield.endTime - playerState.shield.duration,
+            duration: playerState.shield.duration
+        });
+    }
+
+    if (playerState.freezeActive.endTime > now) {
+        activePowerups.push({
+            name: '冻结',
+            icon: '❄️',
+            startTime: playerState.freezeActive.endTime - playerState.freezeActive.duration,
+            duration: playerState.freezeActive.duration
+        });
+    }
+
+    // 更新显示
+    if (activePowerups.length === 0) {
+        list.innerHTML = '<div class="no-powerups">暂无活跃道具</div>';
+    } else {
+        list.innerHTML = '';
+        activePowerups.forEach(powerup => {
+            const remaining = powerup.startTime + powerup.duration - Date.now();
+            const percentage = (remaining / powerup.duration) * 100;
+
+            const item = document.createElement('div');
+            item.className = 'powerup-item';
+            item.innerHTML = `
+                <div class="powerup-icon">${powerup.icon}</div>
+                <div class="powerup-info">
+                    <div class="powerup-name">${powerup.name}</div>
+                    <div class="powerup-timer-bar">
+                        <div class="powerup-timer-fill" style="width: ${percentage}%;"></div>
+                    </div>
+                </div>
+            `;
+
+            list.appendChild(item);
+        });
+    }
+}
+
+// 更新高分记录
+function updateHighScore() {
+    const highScore = localStorage.getItem('tankGameHighScore');
+    UI_ELEMENTS.highScore.textContent = highScore || 0;
+}
+
+// 更新侧边栏音效按钮状态
+function updateSidebarSoundBtn() {
+    if (soundEnabled) {
+        UI_ELEMENTS.sidebarSoundBtn.textContent = '🔊 音效';
+        UI_ELEMENTS.sidebarSoundBtn.classList.remove('sound-off');
+        UI_ELEMENTS.sidebarSoundBtn.classList.add('sound-on');
+    } else {
+        UI_ELEMENTS.sidebarSoundBtn.textContent = '🔇 静音';
+        UI_ELEMENTS.sidebarSoundBtn.classList.remove('sound-on');
+        UI_ELEMENTS.sidebarSoundBtn.classList.add('sound-off');
+    }
+}
+
+// 切换暂停
+function togglePause() {
+    if (!gameState.running) return;
+
+    gameState.paused = !gameState.paused;
+
+    if (gameState.paused) {
+        UI_ELEMENTS.sidebarPauseBtn.textContent = '▶️ 继续';
+        gameState.gamePausedTime = Date.now(); // 记录暂停时间点
+    } else {
+        UI_ELEMENTS.sidebarPauseBtn.textContent = '⏸️ 暂停';
+        // 计算暂停持续时间并累加到总暂停时间
+        const pausedDuration = Date.now() - gameState.gamePausedTime;
+        gameState.totalPausedDuration += pausedDuration;
+        gameState.gamePausedTime = 0;
+    }
 }
 
 // 游戏主循环
@@ -908,7 +1138,11 @@ function gameLoop() {
     if (!gameState.running) return;
 
     const now = Date.now();
-    update(now);
+
+    if (!gameState.paused) {
+        update(now);
+    }
+
     render(now);
 
     requestAnimationFrame(gameLoop);
@@ -922,6 +1156,7 @@ function update(now = Date.now()) {
     updateExplosions();
     updatePowerups(now);
     checkGameState();
+    updateSidebar(); // 更新侧边栏显示（游戏时间、道具等）
 }
 
 // 更新玩家
@@ -948,7 +1183,7 @@ function updatePlayer(now) {
     player.direction = newDirection;
 
     if (moving) {
-        const speed = playerState.speedBoost > now ? player.speed * 1.5 : player.speed; // 速度提升50%
+        const speed = playerState.speedBoost.endTime > now ? player.speed * 1.5 : player.speed; // 速度提升50%
         const newX = player.x + player.direction.x * speed;
         const newY = player.y + player.direction.y * speed;
 
@@ -1068,7 +1303,7 @@ function checkTankCollision(tank, newX, newY) {
 // 射击
 function shoot(tank, now) {
     const cooldown = tank.isPlayer ?
-        (playerState.firePowerBoost > now ? GAME_CONFIG.player.shootCooldown / 2 : GAME_CONFIG.player.shootCooldown) :
+        (playerState.firePowerBoost.endTime > now ? GAME_CONFIG.player.shootCooldown / 2 : GAME_CONFIG.player.shootCooldown) :
         (GAME_CONFIG.enemy.shootCooldown + Math.random() * GAME_CONFIG.enemy.cooldownVariance);
 
     if (now - tank.lastShot < cooldown) return;
@@ -1079,7 +1314,7 @@ function shoot(tank, now) {
     const bulletY = tank.y + tank.height / 2 - 4 + tank.direction.y * (tank.height / 2);
 
     // 火力增强：多发子弹
-    if (tank.isPlayer && playerState.firePowerBoost > now) {
+    if (tank.isPlayer && playerState.firePowerBoost.endTime > now) {
         // 主子弹
         bullets.push({
             x: bulletX,
@@ -1202,6 +1437,7 @@ function updateBullets(now) {
                     enemies.splice(i, 1);
                     gameState.score += GAME_CONFIG.game.baseScorePerEnemy;
                     gameState.enemiesRemaining--; // 减少剩余敌人数量
+                    gameState.enemiesKilled++; // 增加消灭敌人计数
                     updateUI();
                     return false;
                 }
@@ -1209,7 +1445,7 @@ function updateBullets(now) {
         } else {
             if (player && rectCollision(bullet.x, bullet.y, bullet.width, bullet.height, player.x, player.y, player.width, player.height)) {
                 // 护盾可以吸收伤害
-                if (playerState.shield > now) {
+                if (playerState.shield.endTime > now) {
                     return false;
                 }
                 createExplosion(player.x + player.width / 2, player.y + player.height / 2, 'large');
@@ -1282,6 +1518,12 @@ function gameOver(victory) {
 
     // 清除敌人生成计时器
     clearEnemySpawnTimeouts();
+
+    // 保存最高分
+    const highScore = localStorage.getItem('tankGameHighScore');
+    if (!highScore || gameState.score > parseInt(highScore)) {
+        localStorage.setItem('tankGameHighScore', gameState.score.toString());
+    }
 
     UI_ELEMENTS.gameOverTitle.textContent = victory ? '🎉 胜利！' : '💀 游戏结束';
     UI_ELEMENTS.finalScore.textContent = `最终分数: ${gameState.score}`;
@@ -1459,7 +1701,7 @@ function renderTank(tank, now) {
     ctx.fillRect(tank.width / 2 - 2, -tank.height / 2, 4, tank.height);
 
     // 渲染护盾
-    if (tank.isPlayer && playerState.shield > now) {
+    if (tank.isPlayer && playerState.shield.endTime > now) {
         ctx.strokeStyle = 'rgba(0, 191, 255, 0.6)';
         ctx.lineWidth = 3;
         ctx.beginPath();

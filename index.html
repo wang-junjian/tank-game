@@ -12,14 +12,20 @@
         }
 
         body {
-            background: #1a1a1a;
+            background: linear-gradient(135deg, #1a1a2e 0%, #16213e 50%, #0f0f23 100%);
             display: flex;
-            flex-direction: column;
             align-items: center;
             justify-content: center;
             min-height: 100vh;
-            font-family: 'Arial', sans-serif;
+            font-family: 'Segoe UI', 'Microsoft YaHei', sans-serif;
             color: white;
+            padding: 20px;
+        }
+
+        #gameWrapper {
+            display: flex;
+            gap: 20px;
+            align-items: flex-start;
         }
 
         #gameContainer {
@@ -27,17 +33,266 @@
         }
 
         #gameCanvas {
-            border: 4px solid #333;
+            border: 3px solid #4a4a6a;
+            border-radius: 8px;
             background: #000;
+            box-shadow: 0 0 30px rgba(255, 107, 53, 0.2),
+                        0 0 60px rgba(0, 0, 0, 0.5);
         }
 
-        #ui {
-            margin-top: 10px;
+        /* 侧边栏样式 */
+        #sidebar {
+            width: 280px;
+            background: rgba(30, 30, 50, 0.9);
+            border-radius: 12px;
+            padding: 20px;
+            border: 1px solid #3a3a5a;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.4);
+        }
+
+        .sidebar-section {
+            margin-bottom: 24px;
+        }
+
+        .sidebar-section:last-child {
+            margin-bottom: 0;
+        }
+
+        .section-title {
+            font-size: 14px;
+            color: #888;
+            margin-bottom: 12px;
+            text-transform: uppercase;
+            letter-spacing: 1px;
             display: flex;
-            gap: 30px;
-            font-size: 18px;
+            align-items: center;
+            gap: 8px;
         }
 
+        .section-title::before {
+            content: '';
+            width: 4px;
+            height: 14px;
+            background: #ff6b35;
+            border-radius: 2px;
+        }
+
+        /* 状态栏 */
+        .stats-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 12px;
+        }
+
+        .stat-item {
+            background: rgba(255, 255, 255, 0.05);
+            padding: 12px;
+            border-radius: 8px;
+            text-align: center;
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            transition: transform 0.2s, box-shadow 0.2s;
+        }
+
+        .stat-item:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+        }
+
+        .stat-label {
+            font-size: 12px;
+            color: #888;
+            margin-bottom: 4px;
+        }
+
+        .stat-value {
+            font-size: 24px;
+            font-weight: bold;
+            color: #ff6b35;
+        }
+
+        .stat-icon {
+            font-size: 20px;
+            margin-bottom: 4px;
+        }
+
+        /* 生命值心形显示 */
+        .lives-container {
+            display: flex;
+            gap: 6px;
+            justify-content: center;
+            flex-wrap: wrap;
+        }
+
+        .heart {
+            font-size: 20px;
+            transition: transform 0.2s;
+        }
+
+        .heart.lost {
+            filter: grayscale(100%);
+            opacity: 0.3;
+        }
+
+        .heart.pulse {
+            animation: heartPulse 0.3s ease-in-out;
+        }
+
+        @keyframes heartPulse {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.3); }
+        }
+
+        /* 关卡进度条 */
+        .level-progress {
+            margin-top: 8px;
+        }
+
+        .progress-bar {
+            height: 8px;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 4px;
+            overflow: hidden;
+        }
+
+        .progress-fill {
+            height: 100%;
+            background: linear-gradient(90deg, #ff6b35, #ff8555);
+            border-radius: 4px;
+            transition: width 0.3s ease;
+            width: 0%;
+        }
+
+        .enemies-info {
+            display: flex;
+            justify-content: space-between;
+            margin-top: 8px;
+            font-size: 13px;
+            color: #aaa;
+        }
+
+        /* 道具效果区 */
+        .powerups-list {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+
+        .powerup-item {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            background: rgba(255, 255, 255, 0.05);
+            padding: 10px;
+            border-radius: 8px;
+            border: 1px solid rgba(255, 255, 255, 0.08);
+        }
+
+        .powerup-icon {
+            font-size: 28px;
+            width: 40px;
+            text-align: center;
+        }
+
+        .powerup-info {
+            flex: 1;
+        }
+
+        .powerup-name {
+            font-size: 14px;
+            margin-bottom: 4px;
+        }
+
+        .powerup-timer-bar {
+            height: 4px;
+            background: rgba(255, 255, 255, 0.15);
+            border-radius: 2px;
+            overflow: hidden;
+        }
+
+        .powerup-timer-fill {
+            height: 100%;
+            background: linear-gradient(90deg, #4CAF50, #8BC34A);
+            border-radius: 2px;
+            transition: width 0.1s linear;
+        }
+
+        .no-powerups {
+            text-align: center;
+            color: #666;
+            font-size: 13px;
+            padding: 20px;
+        }
+
+        /* 控制按钮区 */
+        .controls-buttons {
+            display: flex;
+            gap: 10px;
+        }
+
+        .control-btn {
+            flex: 1;
+            padding: 10px 15px;
+            font-size: 14px;
+            background: rgba(255, 255, 255, 0.1);
+            color: white;
+            border: 1px solid rgba(255, 255, 255, 0.15);
+            border-radius: 6px;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .control-btn:hover {
+            background: rgba(255, 255, 255, 0.2);
+            transform: translateY(-2px);
+        }
+
+        .control-btn.sound-on {
+            background: rgba(76, 175, 80, 0.3);
+            border-color: #4CAF50;
+        }
+
+        .control-btn.sound-off {
+            background: rgba(244, 67, 54, 0.3);
+            border-color: #f44336;
+        }
+
+        /* 历史最高分 */
+        .high-score {
+            text-align: center;
+            padding: 15px;
+            background: linear-gradient(135deg, rgba(255, 107, 53, 0.2), rgba(255, 133, 85, 0.1));
+            border-radius: 8px;
+            border: 1px solid rgba(255, 107, 53, 0.3);
+        }
+
+        .high-score-label {
+            font-size: 12px;
+            color: #ff8555;
+            margin-bottom: 4px;
+        }
+
+        .high-score-value {
+            font-size: 28px;
+            font-weight: bold;
+            color: #ff6b35;
+            text-shadow: 0 0 10px rgba(255, 107, 53, 0.5);
+        }
+
+        /* 游戏时间 */
+        .game-time {
+            text-align: center;
+            font-size: 24px;
+            font-family: 'Courier New', monospace;
+            color: #888;
+            letter-spacing: 2px;
+        }
+
+        /* 原有的UI */
+        #ui {
+            display: none;
+        }
+
+        /* 开始/结束/配置界面 */
         #startScreen, #gameOverScreen, #configScreen {
             position: absolute;
             top: 0;
@@ -50,6 +305,7 @@
             align-items: center;
             justify-content: center;
             z-index: 10;
+            border-radius: 8px;
         }
 
         #configScreen {
@@ -158,149 +414,247 @@
         .hidden {
             display: none !important;
         }
+
+        /* 响应式设计 */
+        @media (max-width: 1200px) {
+            #gameWrapper {
+                flex-direction: column;
+                align-items: center;
+            }
+
+            #sidebar {
+                width: 100%;
+                max-width: 800px;
+            }
+
+            .stats-grid {
+                grid-template-columns: repeat(4, 1fr);
+            }
+        }
     </style>
 </head>
 <body>
-    <div id="gameContainer">
-        <canvas id="gameCanvas" width="800" height="800"></canvas>
-        
-        <div id="startScreen">
-            <h1>🎮 坦克大战</h1>
-            <p>保护你的基地，消灭所有敌人！</p>
-            <div class="controls">
-                <h3>操作说明</h3>
-                <p>WASD / 方向键 - 移动坦克</p>
-                <p>空格键 - 发射子弹</p>
+    <div id="gameWrapper">
+        <!-- 游戏画布区域 -->
+        <div id="gameContainer">
+            <canvas id="gameCanvas" width="800" height="800"></canvas>
+
+            <div id="startScreen">
+                <h1>🎮 坦克大战</h1>
+                <p>保护你的基地，消灭所有敌人！</p>
+                <div class="controls">
+                    <h3>操作说明</h3>
+                    <p>WASD / 方向键 - 移动坦克</p>
+                    <p>空格键 - 发射子弹</p>
+                </div>
+                <div style="margin-top: 20px; display: flex; gap: 15px;">
+                    <button id="startBtn">开始游戏</button>
+                    <button id="configBtn" style="background: #4CAF50;">⚙️ 配置</button>
+                </div>
             </div>
-            <div style="margin-top: 20px; display: flex; gap: 15px;">
-                <button id="startBtn">开始游戏</button>
-                <button id="configBtn" style="background: #4CAF50;">⚙️ 配置</button>
+
+            <div id="configScreen" class="hidden">
+                <h1>⚙️ 游戏配置</h1>
+
+                <div class="config-section">
+                    <h3>玩家配置</h3>
+                    <div class="config-item">
+                        <label>移动速度</label>
+                        <input type="range" id="playerSpeed" min="1" max="5" step="0.5" value="2">
+                        <input type="number" id="playerSpeedNum" min="1" max="5" step="0.5" value="2">
+                    </div>
+                    <div class="config-item">
+                        <label>射击冷却 (ms)</label>
+                        <input type="range" id="playerCooldown" min="100" max="1000" step="50" value="300">
+                        <input type="number" id="playerCooldownNum" min="100" max="1000" step="50" value="300">
+                    </div>
+                    <div class="config-item">
+                        <label>初始生命</label>
+                        <input type="range" id="initialLives" min="1" max="10" step="1" value="3">
+                        <input type="number" id="initialLivesNum" min="1" max="10" step="1" value="3">
+                    </div>
+                </div>
+
+                <div class="config-section">
+                    <h3>敌人配置</h3>
+                    <div class="config-item">
+                        <label>基础速度</label>
+                        <input type="range" id="enemySpeed" min="0.5" max="3" step="0.1" value="1">
+                        <input type="number" id="enemySpeedNum" min="0.5" max="3" step="0.1" value="1">
+                    </div>
+                    <div class="config-item">
+                        <label>每关速度增加</label>
+                        <input type="range" id="enemySpeedIncrease" min="0" max="1" step="0.1" value="0.2">
+                        <input type="number" id="enemySpeedIncreaseNum" min="0" max="1" step="0.1" value="0.2">
+                    </div>
+                    <div class="config-item">
+                        <label>初始数量</label>
+                        <input type="range" id="enemyCount" min="1" max="10" step="1" value="4">
+                        <input type="number" id="enemyCountNum" min="1" max="10" step="1" value="4">
+                    </div>
+                    <div class="config-item">
+                        <label>每关数量增加</label>
+                        <input type="range" id="enemyCountIncrease" min="0" max="3" step="1" value="1">
+                        <input type="number" id="enemyCountIncreaseNum" min="0" max="3" step="1" value="1">
+                    </div>
+                    <div class="config-item">
+                        <label>最大数量</label>
+                        <input type="range" id="enemyMaxCount" min="5" max="20" step="1" value="8">
+                        <input type="number" id="enemyMaxCountNum" min="5" max="20" step="1" value="8">
+                    </div>
+                </div>
+
+                <div class="config-section">
+                    <h3>道具配置</h3>
+                    <div class="config-item">
+                        <label>生成间隔 (ms)</label>
+                        <input type="range" id="powerupInterval" min="2000" max="20000" step="1000" value="5000">
+                        <input type="number" id="powerupIntervalNum" min="2000" max="20000" step="1000" value="5000">
+                    </div>
+                    <div class="config-item">
+                        <label>效果持续时间 (ms)</label>
+                        <input type="range" id="powerupDuration" min="5000" max="30000" step="1000" value="10000">
+                        <input type="number" id="powerupDurationNum" min="5000" max="30000" step="1000" value="10000">
+                    </div>
+                    <div class="config-item">
+                        <label>道具生命周期 (ms)</label>
+                        <input type="range" id="powerupLifetime" min="2000" max="10000" step="500" value="3000">
+                        <input type="number" id="powerupLifetimeNum" min="2000" max="10000" step="500" value="3000">
+                    </div>
+                </div>
+
+                <div class="config-section">
+                    <h3>地图配置</h3>
+                    <div class="config-item">
+                        <label>初始砖墙数量</label>
+                        <input type="range" id="initialBricks" min="50" max="150" step="10" value="80">
+                        <input type="number" id="initialBricksNum" min="50" max="150" step="10" value="80">
+                    </div>
+                    <div class="config-item">
+                        <label>每关砖墙增加</label>
+                        <input type="range" id="bricksPerLevel" min="0" max="30" step="5" value="10">
+                        <input type="number" id="bricksPerLevelNum" min="0" max="30" step="5" value="10">
+                    </div>
+                    <div class="config-item">
+                        <label>初始钢铁数量</label>
+                        <input type="range" id="initialSteel" min="5" max="30" step="5" value="10">
+                        <input type="number" id="initialSteelNum" min="5" max="30" step="5" value="10">
+                    </div>
+                    <div class="config-item">
+                        <label>每关钢铁增加</label>
+                        <input type="range" id="steelPerLevel" min="0" max="10" step="1" value="2">
+                        <input type="number" id="steelPerLevelNum" min="0" max="10" step="1" value="2">
+                    </div>
+                </div>
+
+                <div class="config-section">
+                    <h3>音效配置</h3>
+                    <div class="config-item">
+                        <label>音效开关</label>
+                        <input type="checkbox" id="soundEnabled" checked>
+                    </div>
+                    <div class="config-item">
+                        <label>音量</label>
+                        <input type="range" id="soundVolume" min="0" max="1" step="0.1" value="0.5">
+                        <input type="number" id="soundVolumeNum" min="0" max="1" step="0.1" value="0.5">
+                    </div>
+                </div>
+
+                <div class="config-buttons">
+                    <button id="saveConfigBtn">💾 保存配置</button>
+                    <button id="resetConfigBtn" style="background: #ff6b35;">🔄 重置默认</button>
+                    <button id="closeConfigBtn" style="background: #666;">关闭</button>
+                </div>
+            </div>
+
+            <div id="gameOverScreen" class="hidden">
+                <h1 id="gameOverTitle">游戏结束</h1>
+                <p id="finalScore">最终分数: 0</p>
+                <p id="finalLevel">关卡: 1</p>
+                <button id="restartBtn">重新开始</button>
             </div>
         </div>
 
-        <div id="configScreen" class="hidden">
-            <h1>⚙️ 游戏配置</h1>
+        <!-- 侧边栏 -->
+        <div id="sidebar">
+            <!-- 游戏时间 -->
+            <div class="sidebar-section">
+                <div class="section-title">游戏时间</div>
+                <div class="game-time" id="gameTime">00:00</div>
+            </div>
 
-            <div class="config-section">
-                <h3>玩家配置</h3>
-                <div class="config-item">
-                    <label>移动速度</label>
-                    <input type="range" id="playerSpeed" min="1" max="5" step="0.5" value="2">
-                    <input type="number" id="playerSpeedNum" min="1" max="5" step="0.5" value="2">
-                </div>
-                <div class="config-item">
-                    <label>射击冷却 (ms)</label>
-                    <input type="range" id="playerCooldown" min="100" max="1000" step="50" value="300">
-                    <input type="number" id="playerCooldownNum" min="100" max="1000" step="50" value="300">
-                </div>
-                <div class="config-item">
-                    <label>初始生命</label>
-                    <input type="range" id="initialLives" min="1" max="10" step="1" value="3">
-                    <input type="number" id="initialLivesNum" min="1" max="10" step="1" value="3">
+            <!-- 主要状态 -->
+            <div class="sidebar-section">
+                <div class="section-title">游戏状态</div>
+                <div class="stats-grid">
+                    <div class="stat-item">
+                        <div class="stat-icon">⭐</div>
+                        <div class="stat-label">分数</div>
+                        <div class="stat-value" id="sidebarScore">0</div>
+                    </div>
+                    <div class="stat-item">
+                        <div class="stat-icon">🎯</div>
+                        <div class="stat-label">关卡</div>
+                        <div class="stat-value" id="sidebarLevel">1</div>
+                    </div>
                 </div>
             </div>
 
-            <div class="config-section">
-                <h3>敌人配置</h3>
-                <div class="config-item">
-                    <label>基础速度</label>
-                    <input type="range" id="enemySpeed" min="0.5" max="3" step="0.1" value="1">
-                    <input type="number" id="enemySpeedNum" min="0.5" max="3" step="0.1" value="1">
-                </div>
-                <div class="config-item">
-                    <label>每关速度增加</label>
-                    <input type="range" id="enemySpeedIncrease" min="0" max="1" step="0.1" value="0.2">
-                    <input type="number" id="enemySpeedIncreaseNum" min="0" max="1" step="0.1" value="0.2">
-                </div>
-                <div class="config-item">
-                    <label>初始数量</label>
-                    <input type="range" id="enemyCount" min="1" max="10" step="1" value="4">
-                    <input type="number" id="enemyCountNum" min="1" max="10" step="1" value="4">
-                </div>
-                <div class="config-item">
-                    <label>每关数量增加</label>
-                    <input type="range" id="enemyCountIncrease" min="0" max="3" step="1" value="1">
-                    <input type="number" id="enemyCountIncreaseNum" min="0" max="3" step="1" value="1">
-                </div>
-                <div class="config-item">
-                    <label>最大数量</label>
-                    <input type="range" id="enemyMaxCount" min="5" max="20" step="1" value="8">
-                    <input type="number" id="enemyMaxCountNum" min="5" max="20" step="1" value="8">
+            <!-- 生命值 -->
+            <div class="sidebar-section">
+                <div class="section-title">生命值</div>
+                <div class="stat-item">
+                    <div class="lives-container" id="livesContainer">
+                        <span class="heart">❤️</span>
+                        <span class="heart">❤️</span>
+                        <span class="heart">❤️</span>
+                    </div>
                 </div>
             </div>
 
-            <div class="config-section">
-                <h3>道具配置</h3>
-                <div class="config-item">
-                    <label>生成间隔 (ms)</label>
-                    <input type="range" id="powerupInterval" min="2000" max="20000" step="1000" value="5000">
-                    <input type="number" id="powerupIntervalNum" min="2000" max="20000" step="1000" value="5000">
-                </div>
-                <div class="config-item">
-                    <label>效果持续时间 (ms)</label>
-                    <input type="range" id="powerupDuration" min="5000" max="30000" step="1000" value="10000">
-                    <input type="number" id="powerupDurationNum" min="5000" max="30000" step="1000" value="10000">
-                </div>
-                <div class="config-item">
-                    <label>道具生命周期 (ms)</label>
-                    <input type="range" id="powerupLifetime" min="2000" max="10000" step="500" value="3000">
-                    <input type="number" id="powerupLifetimeNum" min="2000" max="10000" step="500" value="3000">
+            <!-- 敌人进度 -->
+            <div class="sidebar-section">
+                <div class="section-title">敌人进度</div>
+                <div class="level-progress">
+                    <div class="progress-bar">
+                        <div class="progress-fill" id="enemyProgressFill"></div>
+                    </div>
+                    <div class="enemies-info">
+                        <span>剩余: <strong id="sidebarEnemies">0</strong></span>
+                        <span>已消灭: <strong id="enemiesKilled">0</strong></span>
+                    </div>
                 </div>
             </div>
 
-            <div class="config-section">
-                <h3>地图配置</h3>
-                <div class="config-item">
-                    <label>初始砖墙数量</label>
-                    <input type="range" id="initialBricks" min="50" max="150" step="10" value="80">
-                    <input type="number" id="initialBricksNum" min="50" max="150" step="10" value="80">
-                </div>
-                <div class="config-item">
-                    <label>每关砖墙增加</label>
-                    <input type="range" id="bricksPerLevel" min="0" max="30" step="5" value="10">
-                    <input type="number" id="bricksPerLevelNum" min="0" max="30" step="5" value="10">
-                </div>
-                <div class="config-item">
-                    <label>初始钢铁数量</label>
-                    <input type="range" id="initialSteel" min="5" max="30" step="5" value="10">
-                    <input type="number" id="initialSteelNum" min="5" max="30" step="5" value="10">
-                </div>
-                <div class="config-item">
-                    <label>每关钢铁增加</label>
-                    <input type="range" id="steelPerLevel" min="0" max="10" step="1" value="2">
-                    <input type="number" id="steelPerLevelNum" min="0" max="10" step="1" value="2">
+            <!-- 活跃道具 -->
+            <div class="sidebar-section">
+                <div class="section-title">活跃道具</div>
+                <div class="powerups-list" id="powerupsList">
+                    <div class="no-powerups">暂无活跃道具</div>
                 </div>
             </div>
 
-            <div class="config-section">
-                <h3>音效配置</h3>
-                <div class="config-item">
-                    <label>音效开关</label>
-                    <input type="checkbox" id="soundEnabled" checked>
-                </div>
-                <div class="config-item">
-                    <label>音量</label>
-                    <input type="range" id="soundVolume" min="0" max="1" step="0.1" value="0.5">
-                    <input type="number" id="soundVolumeNum" min="0" max="1" step="0.1" value="0.5">
+            <!-- 控制按钮 -->
+            <div class="sidebar-section">
+                <div class="section-title">控制</div>
+                <div class="controls-buttons">
+                    <button class="control-btn" id="sidebarPauseBtn">⏸️ 暂停</button>
+                    <button class="control-btn sound-on" id="sidebarSoundBtn">🔊 音效</button>
                 </div>
             </div>
 
-            <div class="config-buttons">
-                <button id="saveConfigBtn">💾 保存配置</button>
-                <button id="resetConfigBtn" style="background: #ff6b35;">🔄 重置默认</button>
-                <button id="closeConfigBtn" style="background: #666;">关闭</button>
+            <!-- 历史最高分 -->
+            <div class="sidebar-section">
+                <div class="high-score">
+                    <div class="high-score-label">🏆 历史最高分</div>
+                    <div class="high-score-value" id="highScore">0</div>
+                </div>
             </div>
-        </div>
-
-        <div id="gameOverScreen" class="hidden">
-            <h1 id="gameOverTitle">游戏结束</h1>
-            <p id="finalScore">最终分数: 0</p>
-            <p id="finalLevel">关卡: 1</p>
-            <button id="restartBtn">重新开始</button>
         </div>
     </div>
 
-    <div id="ui">
+    <!-- 保留旧UI用于兼容 -->
+    <div id="ui" class="hidden">
         <div>分数: <span id="score">0</span></div>
         <div>关卡: <span id="level">1</span></div>
         <div>生命: <span id="lives">3</span></div>
