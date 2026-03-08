@@ -319,6 +319,17 @@ function setupEventListeners() {
     document.addEventListener('keydown', (e) => {
         keys[e.code] = true;
         if (e.code === 'Space') e.preventDefault();
+
+        // 游戏控制快捷键
+        if (e.code === 'KeyP') {
+            togglePause();
+        }
+        if (e.code === 'KeyM') {
+            soundEnabled = !soundEnabled;
+            UI_ELEMENTS.soundBtn.textContent = soundEnabled ? '开启' : '关闭';
+            UI_ELEMENTS.soundBtn.style.background = soundEnabled ? '#4CAF50' : '#f44336';
+            updateSidebarSoundBtn();
+        }
     });
 
     document.addEventListener('keyup', (e) => {
