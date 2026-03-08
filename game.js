@@ -320,6 +320,15 @@ function setupEventListeners() {
         keys[e.code] = true;
         if (e.code === 'Space') e.preventDefault();
 
+        // 回车键：开始游戏或重新开始
+        if (e.code === 'Enter') {
+            // 检查是否在开始界面或游戏结束界面
+            if (!UI_ELEMENTS.startScreen.classList.contains('hidden') ||
+                !UI_ELEMENTS.gameOverScreen.classList.contains('hidden')) {
+                startGame();
+            }
+        }
+
         // 游戏控制快捷键
         if (e.code === 'KeyP') {
             togglePause();
