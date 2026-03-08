@@ -2,6 +2,8 @@
 
 一个基于 HTML5 Canvas 和原生 JavaScript 开发的经典坦克游戏克隆，致敬任天堂的《坦克大战》（Battle City）。
 
+![](images/home.jpeg)
+
 ## ✨ 功能特性
 
 ### 核心玩法
