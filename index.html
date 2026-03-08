@@ -41,7 +41,7 @@
         }
 
         /* 侧边栏样式 */
-        #sidebar {
+        .sidebar {
             width: 280px;
             background: rgba(30, 30, 50, 0.9);
             border-radius: 12px;
@@ -172,24 +172,24 @@
 
         /* 道具效果区 */
         .powerups-list {
-            display: flex;
-            flex-direction: column;
+            display: grid;
+            grid-template-columns: 1fr 1fr;
             gap: 10px;
         }
 
         .powerup-item {
             display: flex;
             align-items: center;
-            gap: 12px;
+            gap: 8px;
             background: rgba(255, 255, 255, 0.05);
-            padding: 10px;
+            padding: 8px;
             border-radius: 8px;
             border: 1px solid rgba(255, 255, 255, 0.08);
         }
 
         .powerup-icon {
-            font-size: 28px;
-            width: 40px;
+            font-size: 24px;
+            width: 35px;
             text-align: center;
         }
 
@@ -198,8 +198,8 @@
         }
 
         .powerup-name {
-            font-size: 14px;
-            margin-bottom: 4px;
+            font-size: 13px;
+            margin-bottom: 3px;
         }
 
         .powerup-timer-bar {
@@ -422,7 +422,7 @@
                 align-items: center;
             }
 
-            #sidebar {
+            .sidebar {
                 width: 100%;
                 max-width: 800px;
             }
@@ -435,6 +435,86 @@
 </head>
 <body>
     <div id="gameWrapper">
+        <!-- 左侧边栏 - 游戏简介与玩法 -->
+        <div id="leftSidebar" class="sidebar">
+            <!-- 游戏简介 -->
+            <div class="sidebar-section">
+                <div class="section-title">🎮 游戏简介</div>
+                <div style="font-size: 13px; color: #ccc; line-height: 1.6;">
+                    <p>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;欢迎来到坦克大战！这是一款经典的坦克射击游戏，你需要控制坦克消灭所有敌人，保护你的基地。</p>
+                    <p>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;游戏采用关卡制，每关敌人数量和强度会逐渐增加。收集道具提升坦克能力，挑战更高分数！</p>
+                </div>
+            </div>
+
+            <!-- 操作说明 -->
+            <div class="sidebar-section">
+                <div class="section-title">⌨️ 操作说明</div>
+                <div style="font-size: 13px; color: #ccc; line-height: 1.6;">
+                    <div style="margin-bottom: 10px;">
+                        <strong style="color: #ff6b35;">移动控制：</strong><br>
+                        WASD 或 方向键 - 控制坦克移动<br>
+                    </div>
+                    <div style="margin-bottom: 10px;">
+                        <strong style="color: #ff6b35;">射击控制：</strong><br>
+                        空格键 - 发射子弹
+                    </div>
+                    <div style="margin-bottom: 10px;">
+                        <strong style="color: #ff6b35;">游戏控制：</strong><br>
+                        P 键 - 暂停/继续游戏<br>
+                        M 键 - 开关音效
+                    </div>
+                </div>
+            </div>
+
+            <!-- 道具说明 -->
+            <div class="sidebar-section">
+                <div class="section-title">🎁 道具效果</div>
+                <div class="powerups-list">
+                    <div class="powerup-item">
+                        <div class="powerup-icon">💖</div>
+                        <div class="powerup-info">
+                            <div class="powerup-name">生命+1</div>
+                            <div style="font-size: 12px; color: #aaa;">增加1点生命值</div>
+                        </div>
+                    </div>
+                    <div class="powerup-item">
+                        <div class="powerup-icon">🔥</div>
+                        <div class="powerup-info">
+                            <div class="powerup-name">火力提升</div>
+                            <div style="font-size: 12px; color: #aaa;">双子弹模式</div>
+                        </div>
+                    </div>
+                    <div class="powerup-item">
+                        <div class="powerup-icon">⚡</div>
+                        <div class="powerup-info">
+                            <div class="powerup-name">速度提升</div>
+                            <div style="font-size: 12px; color: #aaa;">移动速度翻倍</div>
+                        </div>
+                    </div>
+                    <div class="powerup-item">
+                        <div class="powerup-icon">🛡️</div>
+                        <div class="powerup-info">
+                            <div class="powerup-name">护盾</div>
+                            <div style="font-size: 12px; color: #aaa;">短暂无敌状态</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 得分规则 -->
+            <div class="sidebar-section">
+                <div class="section-title">💯 得分规则</div>
+                <div style="font-size: 13px; color: #ccc; line-height: 1.6;">
+                    <ul style="list-style: none; padding: 0; margin: 0;">
+                        <li style="margin-bottom: 8px;">• 击毁敌人坦克：100分</li>
+                        <li style="margin-bottom: 8px;">• 通关奖励：500分</li>
+                        <li style="margin-bottom: 8px;">• 道具得分：20分</li>
+                        <li style="margin-bottom: 8px;">• 基地被摧毁：游戏结束</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+
         <!-- 游戏画布区域 -->
         <div id="gameContainer">
             <canvas id="gameCanvas" width="800" height="800"></canvas>
@@ -576,7 +656,7 @@
         </div>
 
         <!-- 侧边栏 -->
-        <div id="sidebar">
+        <div id="sidebar" class="sidebar">
             <!-- 游戏时间 -->
             <div class="sidebar-section">
                 <div class="section-title">游戏时间</div>
