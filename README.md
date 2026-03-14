@@ -6,6 +6,14 @@
 
 ## ✨ 功能特性
 
+### 桌面应用特性
+- 🖥️ 原生桌面应用体验，支持 Windows、macOS、Linux 三大平台
+- 🚀 启动自动最大化窗口，沉浸式游戏体验
+- 🎮 原生菜单栏，支持游戏控制、视图调整、帮助等功能
+- ⌨️ 系统级快捷键支持（重启、退出、全屏、缩放、开发者工具等）
+- 🖼️ 支持窗口化/全屏切换（F11 快捷键）
+- 💾 独立运行，无需浏览器和网络环境
+
 ### 核心玩法
 - **玩家坦克** - 使用 WASD 或方向键控制移动，空格键射击
 - **AI 敌方坦克** - 自动移动和射击，难度随关卡递增
@@ -98,16 +106,39 @@ python -m SimpleHTTPServer 8000
 
 然后在浏览器访问 `http://localhost:8000`
 
+### 方法三：桌面应用（推荐）
+支持打包为 Windows、macOS、Linux 三个平台的独立桌面应用，无需浏览器即可运行：
+
+```bash
+# 安装依赖
+npm install
+
+# 开发模式运行桌面版
+npm run electron:dev
+
+# 打包为当前平台的安装包
+npm run electron:build
+
+# 仅打包当前平台的绿色版本（无需安装）
+npm run electron:build:dir
+```
+
 ## 📁 项目结构
 
 ```
 tank-game/
-├── index.html        # 游戏入口页面（包含左右边栏界面）
-├── game.js          # 游戏逻辑代码（包含事件监听和键盘快捷键）
-├── package.json     # 项目配置文件
-├── test-audio.html  # 音频系统测试页面
-├── test-powerups.html # 道具系统测试页面
-└── README.md        # 说明文档
+├── index.html            # 游戏入口页面（包含左右边栏界面）
+├── game.js              # 游戏逻辑代码（包含事件监听和键盘快捷键）
+├── package.json         # 项目配置文件
+├── electron/            # Electron 桌面应用代码
+│   ├── main/
+│   │   └── index.js     # 主进程代码
+│   └── preload/
+│       └── index.js     # 预加载脚本
+├── electron-builder.yml # Electron 打包配置
+├── test-audio.html      # 音频系统测试页面
+├── test-powerups.html   # 道具系统测试页面
+└── README.md            # 说明文档
 ```
 
 ## 🎨 技术栈
@@ -117,6 +148,8 @@ tank-game/
 - **CSS3** - 界面样式
 - **Web Audio API** - 音频系统，实时生成音效
 - **Web Storage API** - 游戏进度和设置存储（待实现）
+- **Electron** - 跨平台桌面应用打包
+- **electron-builder** - 安装包构建工具
 
 ## 🕹️ 游戏机制
 

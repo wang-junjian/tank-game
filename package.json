@@ -2,10 +2,16 @@
   "name": "tank-game",
   "version": "1.0.0",
   "description": "一个基于 HTML5 Canvas 和原生 JavaScript 开发的经典坦克游戏克隆，致敬任天堂的《坦克大战》（Battle City）。",
-  "main": "game.js",
+  "main": "electron/main/index.js",
   "scripts": {
     "start": "serve -p 8000",
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "electron:dev": "cross-env NODE_ENV=development electron .",
+    "electron:build": "electron-builder",
+    "electron:build:mac": "electron-builder --mac",
+    "electron:build:win": "electron-builder --win",
+    "electron:build:linux": "electron-builder --linux",
+    "electron:build:all": "electron-builder --mac --win --linux"
   },
   "repository": {
     "type": "git",
@@ -18,5 +24,8 @@
   "bugs": {
     "url": "https://github.com/wang-junjian/tank-game/issues"
   },
-  "homepage": "https://github.com/wang-junjian/tank-game#readme"
+  "homepage": "https://github.com/wang-junjian/tank-game#readme",
+  "devDependencies": {
+    "cross-env": "^10.1.0"
+  }
 }
