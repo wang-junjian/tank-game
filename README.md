@@ -113,9 +113,6 @@ python -m SimpleHTTPServer 8000
 # 安装所有依赖（首次运行需要）
 npm install
 
-# 安装Electron相关依赖（如果上面的命令没有自动安装）
-npm install electron electron-builder cross-env --save-dev
-
 # 开发模式运行桌面版
 npm run electron:dev
 

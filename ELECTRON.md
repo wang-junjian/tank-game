@@ -7,11 +7,9 @@
 - npm 或 yarn 包管理器
 
 ## 安装依赖
-首次运行需要安装Electron相关依赖：
+首次运行需要安装所有依赖：
 ```bash
 npm install
-# 或者单独安装Electron依赖
-npm install electron electron-builder cross-env --save-dev
 ```
 
 ## 开发模式运行
