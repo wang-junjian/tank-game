@@ -110,8 +110,11 @@ python -m SimpleHTTPServer 8000
 支持打包为 Windows、macOS、Linux 三个平台的独立桌面应用，无需浏览器即可运行：
 
 ```bash
-# 安装依赖
+# 安装所有依赖（首次运行需要）
 npm install
+
+# 安装Electron相关依赖（如果上面的命令没有自动安装）
+npm install electron electron-builder cross-env --save-dev
 
 # 开发模式运行桌面版
 npm run electron:dev
@@ -119,8 +122,13 @@ npm run electron:dev
 # 打包为当前平台的安装包
 npm run electron:build
 
-# 仅打包当前平台的绿色版本（无需安装）
-npm run electron:build:dir
+# 打包特定平台
+npm run electron:build:mac   # macOS平台
+npm run electron:build:win   # Windows平台
+npm run electron:build:linux # Linux平台
+
+# 打包所有平台安装包
+npm run electron:build:all
 ```
 
 ## 📁 项目结构
@@ -277,6 +285,31 @@ gainNode.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + 0.2);
 1. **胜利条件** - 消灭所有敌方坦克
 2. **失败条件** - 基地被摧毁 或 玩家生命耗尽
 3. **得分规则** - 消灭一个敌人 +100 分，通关 +500 分
+
+## ❓ 常见问题
+
+### Q: 运行 `npm run electron:dev` 提示 "spawn electron ENOENT" 错误怎么办？
+A: 这是因为Electron依赖没有安装，请运行：
+```bash
+npm install electron electron-builder cross-env --save-dev
+```
+如果npm命令不存在，请先安装Node.js环境。
+
+### Q: 游戏没有声音怎么办？
+A: 现代浏览器会阻止自动播放音频，请按下任意按键（比如空格键射击）后音效就会正常播放，或者点击界面上的音效按钮开启声音。
+
+### Q: 打包桌面应用失败怎么办？
+A:
+1. 确保Node.js版本在16.0以上
+2. 检查网络连接，electron-builder需要下载对应平台的二进制文件
+3. macOS平台需要安装Xcode命令行工具：`xcode-select --install`
+4. Windows平台可能需要管理员权限运行命令行
+
+### Q: 可以自定义游戏参数吗？
+A: 可以的，点击游戏界面上的"配置"按钮，可以调整玩家速度、敌人数量、道具生成概率等多种参数，所有配置都会自动保存。
+
+### Q: 游戏进度会保存吗？
+A: 目前版本会自动保存最高分数和配置参数，刷新页面不会丢失。
 
 ## 🎉 致谢
 

@@ -1,5 +1,6 @@
 appId: com.tankgame.app
 productName: 坦克大战
+artifactName: "${productName}-${version}-${platform}-${arch}.${ext}"
 directories:
   output: dist
 files:
@@ -37,6 +38,7 @@ extraResources:
 mac:
   category: public.app-category.games
   icon: public/icon.icns
+  executableName: TankBattle
   target:
     - target: dmg
       arch:
@@ -55,6 +57,7 @@ win:
       arch:
         - x64
   icon: public/icon.ico
+  executableName: TankBattle
 linux:
   target:
     - target: AppImage
@@ -68,6 +71,7 @@ linux:
         - x64
   icon: public/icon.png
   category: Game
+  executableName: TankBattle
 nsis:
   oneClick: false
   allowToChangeInstallationDirectory: true
