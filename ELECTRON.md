@@ -22,7 +22,14 @@ npm run electron:dev
 
 ## 打包桌面应用
 
-### 打包当前平台的应用
+### 快速打包（推荐，速度最快）
+仅打包当前系统架构（如Apple Silicon只打arm64版本）：
+```bash
+npm run electron:build -- --arm64  # Apple M系列芯片
+npm run electron:build -- --x64    # Intel芯片/Windows/Linux
+```
+
+### 打包当前平台的全架构应用
 ```bash
 npm run electron:build
 ```
@@ -71,12 +78,29 @@ npm run electron:build:all
 
 请参考 `public/ICONS.md` 文件来添加自定义应用图标。
 
+## 打包优化
+### 国内镜像加速
+如果打包下载依赖速度慢，可以配置国内镜像：
+```bash
+# 设置Electron镜像
+npm config set ELECTRON_MIRROR https://npmmirror.com/mirrors/electron/
+# 设置electron-builder镜像
+npm config set ELECTRON_BUILDER_BINARIES_MIRROR https://npmmirror.com/mirrors/electron-builder-binaries/
+```
+
+### 图标说明
+项目已经配置为自动处理图标：
+- 只需提供 `public/icon.png` (建议尺寸512x512)
+- 打包时会自动转换为各平台需要的格式（.icns/.ico/.png）
+- 无需手动转换格式
+
 ## 输出目录
 
 打包后的应用会生成在 `dist` 目录下：
 - macOS平台：`dist/mac/` 目录下的 `.app` 文件
 - Windows平台：`dist/win-unpacked/` 目录下的 `.exe` 文件
 - Linux平台：`dist/linux-unpacked/` 目录下的可执行文件
+- 安装包文件会直接生成在 `dist/` 根目录
 
 ## 常见问题
 
@@ -96,7 +120,10 @@ npm config set ELECTRON_BUILDER_BINARIES_MIRROR https://npmmirror.com/mirrors/el
 A: 右键点击应用，选择"打开"，或者在系统设置→隐私与安全性中允许打开该应用。
 
 ### Q: 应用图标显示不正确怎么办？
-A: 请参考 `public/ICONS.md` 准备正确格式和尺寸的图标文件，放在public目录下重新打包。
+A: 确保 `public/icon.png` 存在且尺寸不小于512x512像素，打包时会自动转换为各平台需要的格式。也可以参考 `public/ICONS.md` 手动准备对应格式的图标文件。
+
+### Q: 打包时提示"重命名失败"或ENOENT错误怎么办？
+A: 这个问题已经修复，现在配置使用英文作为可执行文件名，避免中文编码问题。如果仍然遇到错误，请检查Node.js版本是否在16.0以上。
 
 ## 开发注意事项
 - 桌面版游戏会自动最大化窗口，按F11可以切换全屏/窗口模式
