@@ -26,7 +26,7 @@
   "bugs": {
     "url": "https://github.com/wang-junjian/tank-game/issues"
   },
-  "homepage": "https://github.com/wang-junjian/tank-game#readme",
+  "homepage": "https://wangjunjian.com/tank-game/",
   "devDependencies": {
     "cross-env": "^10.1.0",
     "electron": "^41.0.2",
