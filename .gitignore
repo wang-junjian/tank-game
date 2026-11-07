@@ -44,3 +44,6 @@ next-env.d.ts
 
 # Claude Code
 .claude/
+
+# WorkBuddy 本地工作区数据（工作日志等），只留本机，不进开源仓库
+.workbuddy/
