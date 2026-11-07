@@ -2,6 +2,8 @@
 
 一个基于 HTML5 Canvas 和原生 JavaScript 开发的经典坦克游戏克隆，致敬任天堂的《坦克大战》（Battle City）。
 
+**▶ 在线试玩：<https://wangjunjian.com/tank-game/>**（无需安装，浏览器打开即玩）
+
 ![](images/home.jpeg)
 
 ## ✨ 功能特性
@@ -129,12 +131,35 @@ npm run electron:build:linux # Linux平台
 npm run electron:build:all
 ```
 
+## 🌐 在线部署（GitHub Pages）
+
+线上玩的是**单文件构建产物**，仓库里只提交源码。
+
+```bash
+npm run build:web    # index.html + game.js → site/index.html（内联成单文件）
+npm run verify:web   # 用真实 Chrome 打开产物，点开始、看画面是否真的动
+```
+
+`site/` 与 `shots/` 都是产物，已在 `.gitignore` 中忽略。推送 `main` 后，
+`.github/workflows/pages.yml` 会自动完成「语法检查 → 构建 → 复现性校验 → 浏览器自检 → 发布」，
+发布地址即 <https://wangjunjian.com/tank-game/>。
+
+CI 里不执行 `npm ci`：构建脚本零依赖，只临时装 `puppeteer-core`（不含浏览器本体）用于自检，
+所以不需要把 Electron 那一整套 devDependencies 拉到 runner 上。
+
+> 自检失败时工作流会把 `shots/` 作为 artifact 上传，方便直接看当时的画面。
+
 ## 📁 项目结构
 
 ```
 tank-game/
 ├── index.html            # 游戏入口页面（包含左右边栏界面）
 ├── game.js              # 游戏逻辑代码（包含事件监听和键盘快捷键）
+├── scripts/
+│   ├── build-web.mjs    # 内联构建：源码 → site/index.html 单文件
+│   └── verify-web.mjs   # 浏览器自检：能不能真的开局、真的渲染
+├── .github/workflows/
+│   └── pages.yml        # GitHub Pages 构建与发布流程
 ├── package.json         # 项目配置文件
 ├── electron/            # Electron 桌面应用代码
 │   ├── main/

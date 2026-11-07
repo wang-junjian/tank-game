@@ -16,6 +16,12 @@
 /build
 /dist/
 
+# Web 构建与自检产物：由 npm run build:web / verify:web 复现，不入库
+/site/
+/shots/
+# 历史手工生成的内联单文件（同样可由 build:web 复现）
+/tank-game.html
+
 # misc
 .DS_Store
 *.pem

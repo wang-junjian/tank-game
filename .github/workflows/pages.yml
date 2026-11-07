@@ -1,0 +1,78 @@
+name: Deploy playable demo
+
+# 仓库只提交源码（index.html + game.js），可玩的单文件 site/index.html 是构建产物、
+# 不入库；每次 push 到 main 由本工作流重新构建、做浏览器自检，再发布成 Pages 的首页。
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+# 同一时刻只跑一个部署，且不取消进行中的部署（避免站点出现空档）。
+concurrency:
+  group: pages
+  cancel-in-progress: false
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+
+      # 构建本身零依赖（只用 node 标准库），所以不装 electron 那一堆 devDependencies。
+      - name: Syntax check
+        run: node --check game.js
+
+      - name: Build single-file site
+        run: npm run build:web
+
+      # 防「源码改了产物没重建」+ 防非确定性构建：
+      # 再跑一次构建，产物哈希必须一致，且不得改动任何被跟踪文件（产物被 .gitignore 忽略）。
+      - name: Build reproducibility & tracked-files guard
+        run: |
+          sha256sum site/index.html site/icon.png 2>/dev/null > /tmp/h1 || sha256sum site/index.html > /tmp/h1
+          npm run build:web > /dev/null
+          sha256sum site/index.html site/icon.png 2>/dev/null > /tmp/h2 || sha256sum site/index.html > /tmp/h2
+          diff -u /tmp/h1 /tmp/h2
+          git diff --exit-code
+
+      # 浏览器端自检：只装 puppeteer-core（几 MB，不含浏览器本体），
+      # 用 setup-chrome 提供的 Chrome，通过 CHROME_PATH 传给 verify-web.mjs。
+      - uses: browser-actions/setup-chrome@v1
+        id: chrome
+      - name: Install puppeteer-core
+        run: npm install --no-save --no-package-lock puppeteer-core@23
+      - name: Browser self-check
+        env:
+          CHROME_PATH: ${{ steps.chrome.outputs.chrome-path }}
+        run: npm run verify:web
+      - name: Upload shots on failure
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: verify-shots
+          path: shots/
+          if-no-files-found: ignore
+
+      - uses: actions/configure-pages@v5
+      - uses: actions/upload-pages-artifact@v3
+        with:
+          path: site
+
+  deploy:
+    needs: build
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - id: deployment
+        uses: actions/deploy-pages@v4

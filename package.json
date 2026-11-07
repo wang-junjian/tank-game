@@ -5,6 +5,8 @@
   "main": "electron/main/index.js",
   "scripts": {
     "start": "serve -p 8000",
+    "build:web": "node scripts/build-web.mjs",
+    "verify:web": "node scripts/verify-web.mjs",
     "test": "echo \"Error: no test specified\" && exit 1",
     "electron:dev": "cross-env NODE_ENV=development electron .",
     "electron:build": "electron-builder",
